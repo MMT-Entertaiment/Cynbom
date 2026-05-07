@@ -82,6 +82,8 @@
 
   function getYouTubeId(url) {
     if (!url) return null;
+    const short = url.match(/youtu\.be\/([^?&]+)/);
+    if (short) return short[1];
     const match = url.match(/[?&]v=([^&]+)/);
     return match ? match[1] : null;
   }
