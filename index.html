@@ -59,6 +59,7 @@
 <div class="overlay" id="overlay" onclick="fermerRate(event)">
   <div class="popup" onclick="event.stopPropagation()">
     <div class="popup-title">Noter Cynbom</div>
+    <div class="popup-subtitle">Partagez votre avis avec nous</div>
     <label>Pseudonyme</label>
     <input type="text" id="rate-pseudo" placeholder="Votre pseudo...">
     <label>Note</label>
@@ -206,7 +207,7 @@
   }
 
   function fermerRate(e) {
-    if (!e || e.target === document.getElementById("overlay")) {
+    if (!e || !e.target || e.target === document.getElementById("overlay")) {
       document.getElementById("overlay").classList.remove("show");
     }
   }
