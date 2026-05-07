@@ -10,8 +10,8 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; min-height: 100vh; max-width: 400px; margin: 0 auto; }
 
-  .topbar { display: flex; align-items: center; justify-content: center; padding: 24px 20px 16px; }
-  .topbar img.logo { height: 50px; object-fit: contain; }
+  .topbar { display: flex; align-items: center; justify-content: flex-start; padding: 24px 20px 16px; }
+  .topbar img.logo { height: 60px; object-fit: contain; }
 
   /* PAGES */
   .page { display: none; padding: 0 20px; padding-bottom: 110px; }
@@ -52,6 +52,30 @@
 
 <div class="topbar">
   <img class="logo" src="https://i.postimg.cc/v8LWw36P/Logo-Cynbom.jpg" alt="Cynbom">
+  <button class="rate-btn" onclick="ouvrirRate()">⭐ Noter</button>
+</div>
+
+<!-- POPUP NOTATION -->
+<div class="overlay" id="overlay" onclick="fermerRate(event)">
+  <div class="popup" onclick="event.stopPropagation()">
+    <div class="popup-title">Noter Cynbom</div>
+    <label>Pseudonyme</label>
+    <input type="text" id="rate-pseudo" placeholder="Votre pseudo...">
+    <label>Note</label>
+    <div class="stars" id="stars">
+      <span class="star" onclick="setStar(1)">☆</span>
+      <span class="star" onclick="setStar(2)">☆</span>
+      <span class="star" onclick="setStar(3)">☆</span>
+      <span class="star" onclick="setStar(4)">☆</span>
+      <span class="star" onclick="setStar(5)">☆</span>
+    </div>
+    <label>Commentaire</label>
+    <textarea id="rate-comment" placeholder="Votre avis..."></textarea>
+    <div class="popup-actions">
+      <button class="btn-cancel" onclick="fermerRate()">Annuler</button>
+      <button class="btn-send" id="btn-send" onclick="envoyerRate()">Envoyer</button>
+    </div>
+  </div>
 </div>
 
 <!-- PAGE ACCUEIL -->
@@ -174,6 +198,64 @@
   }
 
   chargerSeries();
+
+  let etoile = 0;
+
+  function ouvrirRate() {
+    document.getElementById("overlay").classList.add("show");
+  }
+
+  function fermerRate(e) {
+    if (!e || e.target === document.getElementById("overlay")) {
+      document.getElementById("overlay").classList.remove("show");
+    }
+  }
+
+  function setStar(n) {
+    etoile = n;
+    document.querySelectorAll(".star").forEach((s, i) => {
+      s.textContent = i < n ? "★" : "☆";
+      s.classList.toggle("active", i < n);
+    });
+  }
+
+  async function envoyerRate() {
+    const pseudo = document.getElementById("rate-pseudo").value.trim();
+    const comment = document.getElementById("rate-comment").value.trim();
+    if (!pseudo || !etoile) return alert("Remplissez le pseudonyme et la note !");
+    const btn = document.getElementById("btn-send");
+    btn.disabled = true;
+    btn.textContent = "Envoi...";
+    const etoiles = "★".repeat(etoile) + "☆".repeat(5 - etoile);
+    const msg = {
+      embeds: [{
+        title: "Nouvelle note sur Cynbom",
+        color: 0xffffff,
+        fields: [
+          { name: "Pseudonyme", value: pseudo, inline: true },
+          { name: "Note", value: etoiles + " (" + etoile + "/5)", inline: true },
+          { name: "Commentaire", value: comment || "_(aucun commentaire)_" }
+        ],
+        timestamp: new Date().toISOString()
+      }]
+    };
+    try {
+      await fetch("https://discord.com/api/webhooks/1502077408797393078/c41oQnS7_KjpPmgxchI74hgPlqbsGNPGHdxqC__IsKcrRFXrAXoCV3PUaeg1dc6IDLOC", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(msg)
+      });
+      fermerRate();
+      document.getElementById("rate-pseudo").value = "";
+      document.getElementById("rate-comment").value = "";
+      setStar(0);
+      alert("Merci pour votre avis ! 🎉");
+    } catch(e) {
+      alert("Erreur lors de l envoi.");
+    }
+    btn.disabled = false;
+    btn.textContent = "Envoyer";
+  }
 </script>
 </body>
 </html>
