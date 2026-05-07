@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cynbom</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; min-height: 100vh; max-width: 400px; margin: 0 auto; }
+
+  /* HEADER */
+  .header { position: relative; }
+  .header-img { width: 100%; height: 260px; object-fit: cover; display: block; }
+  .header-placeholder { width: 100%; height: 260px; background: #111; display: flex; align-items: center; justify-content: center; font-size: 13px; color: #333; }
+  .header-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 160px; background: linear-gradient(to bottom, transparent, #000); }
+  .back-btn { position: absolute; top: 20px; left: 16px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid #333; }
+  .back-btn svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* INFOS */
+  .info { padding: 16px 20px 0; }
+  .serie-title { font-size: 24px; font-weight: 600; line-height: 1.2; margin-bottom: 8px; }
+  .serie-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .tag { font-size: 11px; color: #888; background: #111; border: 0.5px solid #222; padding: 3px 8px; border-radius: 4px; }
+  .tag.age { color: #fff; border-color: #333; background: #1a1a1a; }
+
+  /* LECTEUR */
+  .player { margin: 0 20px 24px; border-radius: 12px; overflow: hidden; background: #111; aspect-ratio: 16/9; border: 0.5px solid #1a1a1a; }
+  .player iframe { width: 100%; height: 100%; border: none; display: block; }
+  .player-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #333; font-size: 13px; }
+  .player-placeholder svg { width: 32px; height: 32px; stroke: #333; fill: none; stroke-width: 1.5; }
+
+  /* ÉPISODES */
+  .section-title { font-size: 14px; font-weight: 500; color: #fff; padding: 0 20px; margin-bottom: 12px; }
+  .episodes { padding: 0 20px; padding-bottom: 40px; }
+  .saison-label { font-size: 11px; font-weight: 600; color: #555; letter-spacing: 1px; text-transform: uppercase; margin: 16px 0 8px; }
+  .ep-card { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 0.5px solid #1a1a1a; cursor: pointer; transition: opacity 0.15s; }
+  .ep-card:active { opacity: 0.6; }
+  .ep-card.active-ep .ep-num { color: #fff; }
+  .ep-card.active-ep { opacity: 1; }
+  .ep-num { font-size: 13px; font-weight: 600; color: #444; width: 28px; flex-shrink: 0; text-align: center; }
+  .ep-info { flex: 1; }
+  .ep-title { font-size: 13px; font-weight: 500; color: #fff; }
+  .ep-meta { font-size: 11px; color: #555; margin-top: 2px; }
+  .ep-play { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid #333; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .ep-play svg { width: 12px; height: 12px; fill: #888; margin-left: 1px; }
+  .ep-play.has-video { border-color: #fff; }
+  .ep-play.has-video svg { fill: #fff; }
+  .no-video { color: #333; font-size: 12px; padding: 20px 0; text-align: center; }
+</style>
+</head>
+<body>
+
+<div class="header" id="header">
+  <div class="header-placeholder">Chargement...</div>
+  <div class="header-gradient"></div>
+  <div class="back-btn" onclick="history.back()">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+  </div>
+</div>
+
+<div class="info" id="info"></div>
+
+<div class="player" id="player">
+  <div class="player-placeholder">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="#333" stroke="none"/></svg>
+    Sélectionnez un épisode
+  </div>
+</div>
+
+<div class="section-title">Épisodes</div>
+<div class="episodes" id="episodes">
+  <div class="no-video">Chargement...</div>
+</div>
+
+<script>
+  const API = 'https://cynbom-backend-production.up.railway.app';
+  const params = new URLSearchParams(window.location.search);
+  const titre = decodeURIComponent(params.get('titre') || '');
+  let activeEp = null;
+
+  function getYouTubeId(url) {
+    if (!url) return null;
+    const match = url.match(/[?&]v=([^&]+)/);
+    return match ? match[1] : null;
+  }
+
+  function jouerVideo(url, epCard) {
+    const videoId = getYouTubeId(url);
+    if (!videoId) return;
+    document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active-ep'));
+    epCard.classList.add('active-ep');
+    document.getElementById('player').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allowfullscreen allow="autoplay"></iframe>`;
+    document.getElementById('player').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  async function charger() {
+    try {
+      // Charger infos série
+      const resSeries = await fetch(`${API}/series`);
+      const series = await resSeries.json();
+      const serie = series.find(s => s.titre === titre);
+
+      if (!serie) {
+        document.getElementById('info').innerHTML = '<div style="padding:20px;color:#555">Série introuvable.</div>';
+        return;
+      }
+
+      document.title = `${serie.titre} — Cynbom`;
+
+      // Header image
+      const header = document.getElementById('header');
+      if (serie.image) {
+        header.innerHTML = `
+          <img class="header-img" src="${serie.image}" alt="${serie.titre}">
+          <div class="header-gradient"></div>
+          <div class="back-btn" onclick="history.back()">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </div>`;
+      } else {
+        header.innerHTML = `
+          <div class="header-placeholder">${serie.titre}</div>
+          <div class="header-gradient"></div>
+          <div class="back-btn" onclick="history.back()">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </div>`;
+      }
+
+      // Infos
+      document.getElementById('info').innerHTML = `
+        <div class="serie-title">${serie.titre}</div>
+        <div class="serie-tags">
+          ${serie.studio ? `<span class="tag">${serie.studio}</span>` : ''}
+          ${serie.annee ? `<span class="tag">${serie.annee}</span>` : ''}
+          ${serie.age ? `<span class="tag age">${serie.age}</span>` : ''}
+          ${serie.genre ? `<span class="tag">${serie.genre}</span>` : ''}
+        </div>`;
+
+      // Charger épisodes
+      const resEp = await fetch(`${API}/series/${encodeURIComponent(titre)}/episodes`);
+      const episodes = await resEp.json();
+      const epContainer = document.getElementById('episodes');
+
+      if (episodes.length === 0) {
+        epContainer.innerHTML = '<div class="no-video">Aucun épisode pour le moment.</div>';
+        return;
+      }
+
+      // Grouper par saison
+      const saisons = {};
+      episodes.forEach(ep => {
+        if (!saisons[ep.saison]) saisons[ep.saison] = [];
+        saisons[ep.saison].push(ep);
+      });
+
+      epContainer.innerHTML = Object.entries(saisons).map(([saison, eps]) => `
+        <div class="saison-label">Saison ${saison}</div>
+        ${eps.map(ep => `
+          <div class="ep-card" id="ep-${ep.saison}-${ep.numero}" onclick="handleEp(this, '${ep.video || ''}')">
+            <div class="ep-num">${ep.numero}</div>
+            <div class="ep-info">
+              <div class="ep-title">${ep.titre || `Épisode ${ep.numero}`}</div>
+              <div class="ep-meta">S${ep.saison} · E${ep.numero}</div>
+            </div>
+            <div class="ep-play ${ep.video ? 'has-video' : ''}">
+              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+          </div>
+        `).join('')}
+      `).join('');
+
+    } catch (e) {
+      document.getElementById('episodes').innerHTML = '<div class="no-video">Erreur de connexion.</div>';
+    }
+  }
+
+  function handleEp(card, video) {
+    if (video) {
+      jouerVideo(video, card);
+    }
+  }
+
+  charger();
+</script>
+</body>
+</html>
