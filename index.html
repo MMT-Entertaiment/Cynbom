@@ -218,7 +218,7 @@ function vignetteHTML(s) {
 function bientotCardHTML(s) {
   const titre = titrePropre(s.titre);
   const date = extraireDate(s.titre);
-  return `<div class="bientot-card">
+  return `<div class="bientot-card" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
     ${s.image ? `<img class="bientot-img" src="${s.image}" alt="${titre}">` : `<div class="bientot-placeholder">${titre}</div>`}
     <div class="bientot-title">${titre}</div>
     <div class="bientot-date">${date}</div>
