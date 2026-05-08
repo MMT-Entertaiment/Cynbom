@@ -47,6 +47,9 @@
   .ep-play svg { width: 12px; height: 12px; fill: #888; margin-left: 1px; }
   .ep-play.has-video { border-color: #fff; }
   .ep-play.has-video svg { fill: #fff; }
+  .ep-card.locked { opacity: 0.4; cursor: not-allowed; }
+  .ep-play.locked-icon { border-color: #333; }
+  .ep-play.has-video svg { fill: #fff; }
   .no-video { color: #333; font-size: 12px; padding: 20px 0; text-align: center; }
 </style>
 </head>
@@ -156,21 +159,44 @@
         saisons[ep.saison].push(ep);
       });
 
-      epContainer.innerHTML = Object.entries(saisons).map(([saison, eps]) => `
-        <div class="saison-label">Saison ${saison}</div>
-        ${eps.map(ep => `
-          <div class="ep-card" id="ep-${ep.saison}-${ep.numero}" onclick="handleEp(this, '${ep.video || ''}')">
-            <div class="ep-num">${ep.numero}</div>
-            <div class="ep-info">
-              <div class="ep-title">${ep.titre || `Épisode ${ep.numero}`}</div>
-              <div class="ep-meta">S${ep.saison} · E${ep.numero}</div>
+      // Détecter si arrive bientôt
+      const titreLower = titre.toLowerCase();
+      const arriveBientot = titreLower.includes('(arrive bientôt)') || titreLower.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(titreLower);
+
+      // Trier : si arriveBientot → Trailer en haut, sinon Trailer en bas
+      const saisonKeys = Object.keys(saisons).sort((a, b) => {
+        const aIsTrailer = a.toLowerCase() === 'trailer';
+        const bIsTrailer = b.toLowerCase() === 'trailer';
+        if (arriveBientot) {
+          if (aIsTrailer) return -1;
+          if (bIsTrailer) return 1;
+        } else {
+          if (aIsTrailer) return 1;
+          if (bIsTrailer) return -1;
+        }
+        return isNaN(a) || isNaN(b) ? a.localeCompare(b) : Number(a) - Number(b);
+      });
+
+      epContainer.innerHTML = saisonKeys.map(saison => {
+        const eps = saisons[saison];
+        const isTrailer = saison.toLowerCase() === 'trailer';
+        const locked = arriveBientot && !isTrailer;
+        const saisonLabel = isNaN(saison) ? saison : `Saison ${saison}`;
+        return `
+          <div class="saison-label">${saisonLabel}</div>
+          ${eps.map(ep => `
+            <div class="ep-card ${locked ? 'locked' : ''}" id="ep-${ep.saison}-${ep.numero}" onclick="${locked ? '' : `handleEp(this, '${ep.video || ''}')`}">
+              <div class="ep-num">${ep.numero}</div>
+              <div class="ep-info">
+                <div class="ep-title">${ep.titre || `Épisode ${ep.numero}`}</div>
+                <div class="ep-meta">${isNaN(saison) ? saison : `S${ep.saison}`} · E${ep.numero}</div>
+              </div>
+              <div class="ep-play ${locked ? 'locked-icon' : (ep.video ? 'has-video' : '')}">
+                ${locked ? '<svg viewBox="0 0 24 24" style="fill:#333;stroke:none"><path d="M18 11H16V7C16 4.79 14.21 3 12 3S8 4.79 8 7V11H6C4.9 11 4 11.9 4 13V21C4 22.1 4.9 23 6 23H18C19.1 23 20 22.1 20 21V13C20 11.9 19.1 11 18 11ZM12 18C10.9 18 10 17.1 10 16S10.9 14 12 14 14 14.9 14 16 13.1 18 12 18ZM14 11H10V7C10 5.9 10.9 5 12 5S14 5.9 14 7V11Z"/></svg>' : '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>'}
+              </div>
             </div>
-            <div class="ep-play ${ep.video ? 'has-video' : ''}">
-              <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            </div>
-          </div>
-        `).join('')}
-      `).join('');
+          `).join('')}`;
+      }).join('');
 
     } catch (e) {
       document.getElementById('episodes').innerHTML = '<div class="no-video">Erreur de connexion.</div>';
