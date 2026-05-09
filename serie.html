@@ -46,6 +46,10 @@
   .ep-play { width: 28px; height: 28px; border-radius: 50%; border: 0.5px solid #333; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .ep-play svg { width: 12px; height: 12px; fill: #888; margin-left: 1px; }
   .ep-play.has-video { border-color: #fff; }
+  .album-art { width: calc(100% - 40px); margin: 0 20px 24px; aspect-ratio: 1/1; border-radius: 12px; object-fit: cover; display: block; border: 0.5px solid #1a1a1a; }
+  .album-art-placeholder { width: calc(100% - 40px); margin: 0 20px 24px; aspect-ratio: 1/1; border-radius: 12px; background: #111; border: 0.5px solid #1a1a1a; display: flex; align-items: center; justify-content: center; color: #333; font-size: 13px; }
+  .player-default { margin: 0 20px 24px; border-radius: 12px; overflow: hidden; background: #111; aspect-ratio: 16/9; border: 0.5px solid #1a1a1a; }
+  .player-default-placeholder { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; color: #333; font-size: 13px; }
   .ep-play.has-video svg { fill: #fff; }
   .ep-card.locked { opacity: 0.4; cursor: not-allowed; }
   .ep-play.locked-icon { border-color: #333; }
@@ -65,14 +69,9 @@
 
 <div class="info" id="info"></div>
 
-<div class="player" id="player">
-  <div class="player-placeholder">
-    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="#333" stroke="none"/></svg>
-    Sélectionnez un épisode
-  </div>
-</div>
+<div id="player-wrap"></div>
 
-<div class="section-title">Épisodes</div>
+<div class="section-title" id="section-label">Épisodes</div>
 <div class="episodes" id="episodes">
   <div class="no-video">Chargement...</div>
 </div>
@@ -91,12 +90,20 @@
     return match ? match[1] : null;
   }
 
-  function jouerVideo(url, epCard) {
-    const videoId = getYouTubeId(url);
-    if (!videoId) return;
+  function jouerVideo(url, epCard, albumImg) {
     document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active-ep'));
     epCard.classList.add('active-ep');
-    document.getElementById('player').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen allow="autoplay"></iframe>`;
+
+    // OST mode — juste highlight la musique, l'image reste
+    if (albumImg) {
+      document.getElementById('album-img').scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+
+    // Mode vidéo normal
+    const videoId = getYouTubeId(url);
+    if (!videoId) return;
+    document.getElementById('player').innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?rel=0&modestbranding=1" allowfullscreen style="width:100%;height:100%;border:none;display:block;"></iframe>`;
     document.getElementById('player').scrollIntoView({ behavior: 'smooth' });
   }
 
@@ -142,6 +149,20 @@
           ${serie.genre ? `<span class="tag">${serie.genre}</span>` : ''}
         </div>`;
 
+      // Détecter OST
+      const isOST = (serie.genre || '').toLowerCase().includes('ost');
+      document.getElementById('section-label').textContent = isOST ? 'Musiques' : 'Épisodes';
+
+      // Init player/album art
+      const playerWrap = document.getElementById('player-wrap');
+      if (isOST) {
+        playerWrap.innerHTML = serie.image
+          ? `<img class="album-art" id="album-img" src="${serie.image}" alt="${serie.titre}">`
+          : `<div class="album-art-placeholder" id="album-img">Pochette non disponible</div>`;
+      } else {
+        playerWrap.innerHTML = `<div class="player-default" id="player"><div class="player-default-placeholder"><svg viewBox="0 0 24 24" style="width:32px;height:32px;stroke:#333;fill:none;stroke-width:1.5"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8" fill="#333" stroke="none"/></svg>Sélectionnez un épisode</div></div>`;
+      }
+
       // Charger épisodes
       const resEp = await fetch(`${API}/series/${encodeURIComponent(titre)}/episodes`);
       const episodes = await resEp.json();
@@ -185,7 +206,7 @@
         return `
           <div class="saison-label">${saisonLabel}</div>
           ${eps.map(ep => `
-            <div class="ep-card ${locked ? 'locked' : ''}" id="ep-${ep.saison}-${ep.numero}" onclick="${locked ? '' : `handleEp(this, '${ep.video || ''}')`}">
+            <div class="ep-card ${locked ? 'locked' : ''}" id="ep-${ep.saison}-${ep.numero}" onclick="${locked ? '' : `handleEp(this, '${ep.video || ''}', '${isOST}')`}">
               <div class="ep-num">${ep.numero}</div>
               <div class="ep-info">
                 <div class="ep-title">${ep.titre || `Épisode ${ep.numero}`}</div>
@@ -203,9 +224,11 @@
     }
   }
 
-  function handleEp(card, video) {
-    if (video) {
-      jouerVideo(video, card);
+  function handleEp(card, video, ost) {
+    if (ost === 'true') {
+      jouerVideo(null, card, true);
+    } else if (video) {
+      jouerVideo(video, card, false);
     }
   }
 
