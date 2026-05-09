@@ -34,6 +34,8 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 .row::-webkit-scrollbar { display: none; }
 .vignette { flex-shrink: 0; width: 100px; cursor: pointer; }
 .vignette img { width: 100px; height: 145px; border-radius: 8px; object-fit: cover; display: block; background: #111; }
+.vignette.ost img { height: 100px; }
+.vignette.ost .vignette-placeholder { height: 100px; }
 .vignette-placeholder { width: 100px; height: 145px; border-radius: 8px; background: #111; border: 0.5px solid #1c1c1c; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #333; text-align: center; padding: 6px; line-height: 1.3; }
 .vignette-title { font-size: 11px; font-weight: 500; color: #aaa; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -129,7 +131,7 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 <!-- PAGE SETTINGS -->
 <div class="page" id="page-settings">
   <div class="settings-title">Paramètres</div>
-  <div class="settings-item" onclick="window.open('https://mmt-entertaiment.github.io/Cynbom/tos.html', '_blank')">
+  <div class="settings-item" onclick="window.open('https://mmt-entertaiment.github.io/Cynbom/tos.md', '_blank')">
     <span class="settings-label">Conditions d'utilisation</span>
     <img class="settings-icon" src="https://i.postimg.cc/wvpRcThF/Open.png" alt="Ouvrir">
   </div>
@@ -256,7 +258,8 @@ function titrePropre(titre) {
 // HTML BUILDERS
 function vignetteHTML(s) {
   const titre = titrePropre(s.titre);
-  return `<div class="vignette" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
+  const isOST = (s.genre || '').toLowerCase().includes('ost');
+  return `<div class="vignette${isOST ? ' ost' : ''}" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
     ${s.image ? `<img src="${s.image}" alt="${titre}">` : `<div class="vignette-placeholder">${titre}</div>`}
     <div class="vignette-title">${titre}</div>
   </div>`;
@@ -296,6 +299,7 @@ function afficherContenu() {
   const vedette = actifs.find(s => s.vedette);
   const series = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('série'));
   const films = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('film'));
+  const osts = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('ost'));
 
   let html = '';
 
@@ -323,6 +327,9 @@ function afficherContenu() {
 
   if (filtreActuel !== 'serie' && films.length > 0)
     html += `<div class="section"><div class="section-title">Films</div><div class="row">${films.map(vignetteHTML).join('')}</div></div>`;
+
+  if (filtreActuel !== 'film' && filtreActuel !== 'serie' && osts.length > 0)
+    html += `<div class="section"><div class="section-title">OST</div><div class="row">${osts.map(vignetteHTML).join('')}</div></div>`;
 
   if (bientot.length > 0)
     html += `<div class="section"><div class="section-title">Arrive bientôt</div><div class="row">${bientot.map(bientotCardHTML).join('')}</div></div>`;
@@ -372,4 +379,4 @@ async function chargerSeries() {
 chargerSeries();
 </script>
 </body>
-</html>
+    </html>
