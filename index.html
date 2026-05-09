@@ -9,18 +9,21 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-width: 400px; margin: 0 auto; min-height: 100vh; }
 
-/* TOPBAR */
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 24px 20px 16px; }
-.topbar img.logo { height: 50px; object-fit: contain; }
+/* TOPBAR STICKY */
+.topbar { position: sticky; top: 0; z-index: 50; background: #000; display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 0.5px solid #111; }
+.topbar img.logo { height: 40px; object-fit: contain; }
 
 /* PAGES */
-.page { display: none; padding-bottom: 110px; }
+.page { display: none; padding-bottom: 130px; }
 .page.active { display: block; }
 
+/* FILTRE SÉRIE/FILM */
+
 /* EN VEDETTE */
-.vedette-section { position: relative; margin-bottom: 24px; }
+.vedette-section { position: relative; cursor: pointer; }
 .vedette-img { width: 100%; height: 220px; object-fit: cover; display: block; }
-.vedette-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 140px; background: linear-gradient(to bottom, transparent, #000); }
+.vedette-placeholder { width: 100%; height: 220px; background: #111; display: flex; align-items: center; justify-content: center; color: #333; font-size: 13px; }
+.vedette-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 160px; background: linear-gradient(to bottom, transparent, #000); }
 .vedette-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 16px 20px; }
 .vedette-title { font-size: 22px; font-weight: 600; margin-bottom: 10px; }
 .vedette-actions { display: flex; gap: 8px; }
@@ -28,10 +31,8 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 .btn-savoir { display: flex; align-items: center; gap: 6px; background: rgba(255,255,255,0.15); color: #fff; border: none; border-radius: 8px; padding: 9px 14px; font-size: 13px; font-weight: 500; font-family: 'DM Sans', sans-serif; cursor: pointer; backdrop-filter: blur(4px); }
 
 /* SECTIONS */
-.section { margin-bottom: 24px; }
-.section-title { font-size: 14px; font-weight: 600; padding: 0 20px; margin-bottom: 12px; color: #fff; }
-
-/* VIGNETTES HORIZONTALES */
+.section { margin-bottom: 24px; margin-top: 20px; }
+.section-title { font-size: 14px; font-weight: 600; padding: 0 20px; margin-bottom: 12px; }
 .row { display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 4px; scrollbar-width: none; }
 .row::-webkit-scrollbar { display: none; }
 .vignette { flex-shrink: 0; width: 100px; cursor: pointer; }
@@ -40,18 +41,15 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 .vignette-title { font-size: 11px; font-weight: 500; color: #aaa; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* ARRIVE BIENTOT */
-.bientot-row { display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 4px; scrollbar-width: none; }
-.bientot-row::-webkit-scrollbar { display: none; }
 .bientot-card { flex-shrink: 0; width: 140px; cursor: pointer; }
 .bientot-img { width: 140px; height: 80px; border-radius: 8px; object-fit: cover; background: #111; border: 0.5px solid #1c1c1c; display: block; }
 .bientot-placeholder { width: 140px; height: 80px; border-radius: 8px; background: #111; border: 0.5px solid #1c1c1c; display: flex; align-items: center; justify-content: center; font-size: 9px; color: #333; text-align: center; padding: 6px; }
 .bientot-title { font-size: 11px; font-weight: 500; color: #aaa; margin-top: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .bientot-date { font-size: 10px; color: #555; margin-top: 2px; }
-
 .empty { text-align: center; color: #333; font-size: 14px; padding: 60px 0; }
 
 /* RECHERCHE */
-.search-wrap { padding: 12px 20px 20px; position: sticky; top: 0; background: #000; z-index: 10; }
+.search-wrap { padding: 12px 20px 20px; position: sticky; top: 73px; background: #000; z-index: 10; }
 .search-input { width: 100%; background: #111; border: 0.5px solid #222; border-radius: 10px; padding: 12px 16px; color: #fff; font-family: 'DM Sans', sans-serif; font-size: 14px; outline: none; }
 .search-input::placeholder { color: #444; }
 .search-results { padding: 0 20px; }
@@ -66,8 +64,27 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 .tag.age { color: #fff; border-color: #333; background: #1a1a1a; }
 .no-results { text-align: center; color: #333; font-size: 14px; padding: 40px 0; }
 
+/* SETTINGS */
+.settings-list { padding: 20px; }
+.settings-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 0.5px solid #1a1a1a; cursor: pointer; }
+.settings-item-label { font-size: 14px; font-weight: 500; }
+.settings-item-icon { width: 20px; height: 20px; object-fit: contain; opacity: 0.6; }
+
+/* FILTER BAR */
+
+/* SETTINGS PAGE */
+.settings-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 0.5px solid #1a1a1a; cursor: pointer; }
+.settings-item:active { opacity: 0.6; }
+.settings-label { font-size: 14px; font-weight: 500; }
+.settings-icon { width: 20px; height: 20px; object-fit: contain; opacity: 0.6; }
+
+/* FILTER BAR */
+.filter-bar { display: flex; gap: 8px; padding: 10px 20px; position: fixed; bottom: 70px; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #000; border-top: 0.5px solid #1a1a1a; z-index: 49; }
+.filter-btn { flex: 1; padding: 9px; border-radius: 8px; border: 0.5px solid #222; background: #0a0a0a; color: #555; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; cursor: pointer; text-align: center; }
+.filter-btn.active { background: #fff; color: #000; border-color: #fff; }
+
 /* BOTTOM BAR */
-.bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #000; border-top: 0.5px solid #1a1a1a; padding: 10px 0 24px; display: flex; justify-content: space-around; }
+.bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #000; border-top: 0.5px solid #1a1a1a; padding: 10px 0 24px; display: flex; justify-content: space-around; z-index: 100; }
 .bar-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; min-width: 70px; }
 .bar-btn img { width: 28px; height: 28px; object-fit: contain; opacity: 0.35; transition: opacity 0.15s; }
 .bar-btn span { font-size: 11px; font-weight: 500; color: #444; transition: color 0.15s; }
@@ -101,15 +118,14 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
   <img src="https://i.postimg.cc/sXtQpG8Z/rate.png" alt="Noter" onclick="ouvrirRate()" style="height:36px;object-fit:contain;cursor:pointer;">
 </div>
 
+<!-- PAGE ACCUEIL -->
 <div class="page active" id="page-accueil">
-  <div id="content"><div class="empty">Chargement...</div></div>
-</div>
+  
 
-<div class="page" id="page-recherche">
-  <div class="search-wrap">
-    <input class="search-input" id="search-input" type="text" placeholder="Rechercher une série, un film..." oninput="rechercher()">
-  </div>
-  <div class="search-results" id="search-results"><div class="no-results">Tapez pour rechercher</div></div>
+<div class="filter-bar" id="filter-bar">
+  <div class="filter-btn active" id="filter-tout" onclick="setFilter('tout')">Tout</div>
+  <div class="filter-btn" id="filter-serie" onclick="setFilter('serie')">Séries</div>
+  <div class="filter-btn" id="filter-film" onclick="setFilter('film')">Films</div>
 </div>
 
 <div class="bottom-bar">
@@ -121,9 +137,13 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
     <img src="https://i.postimg.cc/bNmksrgd/Search.png" alt="Rechercher">
     <span>Rechercher</span>
   </div>
+  <div class="bar-btn" id="btn-settings" onclick="setPage('settings')">
+    <img src="https://i.postimg.cc/wvpRcThF/Open.png" alt="Settings">
+    <span>Paramètres</span>
+  </div>
 </div>
 
-<!-- POPUP -->
+<!-- POPUP NOTATION -->
 <div class="overlay" id="overlay">
   <div class="popup">
     <div class="popup-title">Noter Cynbom</div>
@@ -151,6 +171,7 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 const API = 'https://cynbom-backend-production.up.railway.app';
 let toutesLesSeries = [];
 let etoile = 0;
+let filtreActif = 'tous';
 
 document.getElementById('overlay').addEventListener('click', function(e) { if (e.target === this) fermerRate(); });
 document.getElementById('btn-cancel').addEventListener('click', fermerRate);
@@ -193,16 +214,12 @@ async function envoyerRate() {
 
 function estArriveBientot(titre) {
   const t = titre.toLowerCase();
-  if (t.includes('(arrive bientôt)') || t.includes('(arrive bientot)')) return true;
-  if (/\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t)) return true;
-  return false;
+  return t.includes('(arrive bientôt)') || t.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t);
 }
-
 function extraireDate(titre) {
   const match = titre.match(/\(arrive le (\d{2}\/\d{2}\/\d{4})\)/i);
   return match ? match[1] : 'Bientôt';
 }
-
 function titrePropre(titre) {
   return titre.replace(/\(arrive bientôt\)/i, '').replace(/\(arrive bientot\)/i, '').replace(/\(arrive le \d{2}\/\d{2}\/\d{4}\)/i, '').trim();
 }
@@ -214,7 +231,6 @@ function vignetteHTML(s) {
     <div class="vignette-title">${titre}</div>
   </div>`;
 }
-
 function bientotCardHTML(s) {
   const titre = titrePropre(s.titre);
   const date = extraireDate(s.titre);
@@ -224,7 +240,6 @@ function bientotCardHTML(s) {
     <div class="bientot-date">${date}</div>
   </div>`;
 }
-
 function serieCardHTML(s) {
   const titre = titrePropre(s.titre);
   return `<div class="serie-card" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
@@ -241,52 +256,57 @@ function serieCardHTML(s) {
   </div>`;
 }
 
+function afficherContenu(series) {
+  const content = document.getElementById('content');
+  if (series.length === 0) { content.innerHTML = '<div class="empty">Aucun contenu pour le moment.</div>'; return; }
+
+  const bientot = series.filter(s => estArriveBientot(s.titre));
+  const vedette = series.find(s => s.vedette && !estArriveBientot(s.titre));
+  const seriesList = series.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('série'));
+  const filmsList = series.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('film'));
+  const autres = series.filter(s => !s.vedette && !estArriveBientot(s.titre) && !(s.genre || '').toLowerCase().includes('série') && !(s.genre || '').toLowerCase().includes('film'));
+
+  let html = '';
+
+  if (vedette) {
+    html += `<div class="vedette-section" onclick="ouvrirSerie('${encodeURIComponent(vedette.titre)}')">
+      ${vedette.image ? `<img class="vedette-img" src="${vedette.image}" alt="${titrePropre(vedette.titre)}">` : `<div class="vedette-placeholder">${titrePropre(vedette.titre)}</div>`}
+      <div class="vedette-gradient"></div>
+      <div class="vedette-info">
+        <div class="vedette-title">${titrePropre(vedette.titre)}</div>
+        <div class="vedette-actions">
+          <button class="btn-regarder" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">▶ Regarder</button>
+          <button class="btn-savoir" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">En savoir plus</button>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  if (seriesList.length > 0) html += `<div class="section"><div class="section-title">Séries</div><div class="row">${seriesList.map(vignetteHTML).join('')}</div></div>`;
+  if (filmsList.length > 0) html += `<div class="section"><div class="section-title">Films</div><div class="row">${filmsList.map(vignetteHTML).join('')}</div></div>`;
+  if (autres.length > 0) html += `<div class="section"><div class="section-title">Autres</div><div class="row">${autres.map(vignetteHTML).join('')}</div></div>`;
+  if (bientot.length > 0) html += `<div class="section"><div class="section-title">Arrive bientôt</div><div class="row">${bientot.map(bientotCardHTML).join('')}</div></div>`;
+
+  content.innerHTML = html;
+}
+
+function setFilter(filtre) {
+  filtreActif = filtre;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + filtre).classList.add('active');
+
+  let filtered = toutesLesSeries;
+  if (filtre === 'series') filtered = toutesLesSeries.filter(s => (s.genre || '').toLowerCase().includes('série'));
+  if (filtre === 'films') filtered = toutesLesSeries.filter(s => (s.genre || '').toLowerCase().includes('film'));
+
+  afficherContenu(filtered);
+}
+
 async function chargerSeries() {
   try {
     const res = await fetch(`${API}/series`);
     toutesLesSeries = await res.json();
-    const content = document.getElementById('content');
-
-    if (toutesLesSeries.length === 0) { content.innerHTML = '<div class="empty">Aucune série pour le moment.</div>'; return; }
-
-    const vedette = toutesLesSeries.find(s => s.vedette && !estArriveBientot(s.titre));
-    const bientot = toutesLesSeries.filter(s => estArriveBientot(s.titre));
-    const series = toutesLesSeries.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('série'));
-    const films = toutesLesSeries.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('film'));
-
-    let html = '';
-
-    // EN VEDETTE
-    if (vedette) {
-      html += `<div class="vedette-section" onclick="ouvrirSerie('${encodeURIComponent(vedette.titre)}')">
-        ${vedette.image ? `<img class="vedette-img" src="${vedette.image}" alt="${titrePropre(vedette.titre)}">` : `<div class="vedette-img" style="background:#111;display:flex;align-items:center;justify-content:center;color:#333;font-size:13px;">${titrePropre(vedette.titre)}</div>`}
-        <div class="vedette-gradient"></div>
-        <div class="vedette-info">
-          <div class="vedette-title">${titrePropre(vedette.titre)}</div>
-          <div class="vedette-actions">
-            <button class="btn-regarder" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">▶ Regarder</button>
-            <button class="btn-savoir" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">En savoir plus</button>
-          </div>
-        </div>
-      </div>`;
-    }
-
-    // SÉRIES
-    if (series.length > 0) {
-      html += `<div class="section"><div class="section-title">Séries</div><div class="row">${series.map(vignetteHTML).join('')}</div></div>`;
-    }
-
-    // FILMS
-    if (films.length > 0) {
-      html += `<div class="section"><div class="section-title">Films</div><div class="row">${films.map(vignetteHTML).join('')}</div></div>`;
-    }
-
-    // ARRIVE BIENTÔT
-    if (bientot.length > 0) {
-      html += `<div class="section"><div class="section-title">Arrive bientôt</div><div class="bientot-row">${bientot.map(bientotCardHTML).join('')}</div></div>`;
-    }
-
-    content.innerHTML = html;
+    afficherContenu(toutesLesSeries);
   } catch(e) {
     document.getElementById('content').innerHTML = '<div class="empty">Impossible de contacter le serveur.</div>';
   }
@@ -317,12 +337,63 @@ function rechercher() {
   results.innerHTML = scored.length === 0 ? `<div class="no-results">Aucun résultat pour "${q}"</div>` : scored.map(serieCardHTML).join('');
 }
 
+let filtreActuel = 'tout';
+
+function setFilter(filtre) {
+  filtreActuel = filtre;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('filter-' + filtre).classList.add('active');
+  afficherSeries();
+}
+
+function afficherSeries() {
+  const content = document.getElementById('content');
+  if (toutesLesSeries.length === 0) { content.innerHTML = '<div class="empty">Aucun contenu pour le moment.</div>'; return; }
+
+  const vedette = toutesLesSeries.find(s => s.vedette && !estArriveBientot(s.titre));
+  const bientot = toutesLesSeries.filter(s => estArriveBientot(s.titre));
+  const series = toutesLesSeries.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('série'));
+  const films = toutesLesSeries.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('film'));
+
+  let html = '';
+
+  if (filtreActuel === 'tout' || (filtreActuel === 'serie' && vedette && (vedette.genre||'').toLowerCase().includes('série')) || (filtreActuel === 'film' && vedette && (vedette.genre||'').toLowerCase().includes('film')) || (filtreActuel === 'tout' && vedette)) {
+    if (vedette && (filtreActuel === 'tout' || (filtreActuel === 'serie' && (vedette.genre||'').toLowerCase().includes('série')) || (filtreActuel === 'film' && (vedette.genre||'').toLowerCase().includes('film')))) {
+      html += `<div class="vedette-section" onclick="ouvrirSerie('${encodeURIComponent(vedette.titre)}')">
+        ${vedette.image ? `<img class="vedette-img" src="${vedette.image}" alt="${titrePropre(vedette.titre)}">` : `<div class="vedette-img" style="background:#111;height:220px;display:flex;align-items:center;justify-content:center;color:#333;font-size:13px;">${titrePropre(vedette.titre)}</div>`}
+        <div class="vedette-gradient"></div>
+        <div class="vedette-info">
+          <div class="vedette-title">${titrePropre(vedette.titre)}</div>
+          <div class="vedette-actions">
+            <button class="btn-regarder" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">▶ Regarder</button>
+            <button class="btn-savoir" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">En savoir plus</button>
+          </div>
+        </div>
+      </div>`;
+    }
+  }
+
+  if (filtreActuel !== 'film' && series.length > 0) {
+    html += `<div class="section"><div class="section-title">Séries</div><div class="row">${series.map(vignetteHTML).join('')}</div></div>`;
+  }
+  if (filtreActuel !== 'serie' && films.length > 0) {
+    html += `<div class="section"><div class="section-title">Films</div><div class="row">${films.map(vignetteHTML).join('')}</div></div>`;
+  }
+  if (bientot.length > 0) {
+    html += `<div class="section"><div class="section-title">Arrive bientôt</div><div class="bientot-row">${bientot.map(bientotCardHTML).join('')}</div></div>`;
+  }
+
+  if (!html) html = '<div class="empty">Aucun contenu dans cette catégorie.</div>';
+  content.innerHTML = html;
+}
+
 function setPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.bar-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.getElementById('btn-' + page).classList.add('active');
   if (page === 'recherche') setTimeout(() => document.getElementById('search-input').focus(), 100);
+  document.getElementById('filter-bar').style.display = page === 'accueil' ? 'flex' : 'none';
 }
 
 function ouvrirSerie(titre) { window.location.href = `serie.html?titre=${titre}`; }
