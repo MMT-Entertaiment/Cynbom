@@ -123,4 +123,5 @@ MMT Entertaiment se réserve le droit de modifier les présentes conditions à t
 *© 2026 Foxplay Ciné — Développé par MStudio Web — Publié par MMT Entertaiment — Tous droits réservés.*
 
 Si vous voulez retourner sur Cynbom cliquez sur "Accepté"
+
 [Accepté](https://mmt-entertaiment.github.io/Cynbom/)
