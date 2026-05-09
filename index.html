@@ -122,6 +122,21 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 <div class="page active" id="page-accueil">
   
 
+<div class="page" id="page-recherche">
+  <div class="search-wrap">
+    <input class="search-input" id="search-input" type="text" placeholder="Rechercher une série, un film..." oninput="rechercher()">
+  </div>
+  <div class="search-results" id="search-results"><div class="no-results">Tapez pour rechercher</div></div>
+</div>
+
+<div class="page" id="page-settings">
+  <div style="padding: 20px 20px 8px; font-size: 22px; font-weight: 600;">Paramètres</div>
+  <div class="settings-item" onclick="window.open('https://mmt-entertaiment.github.io/Cynbom/tos.md', '_blank')">
+    <span class="settings-label">Conditions d'utilisation</span>
+    <img class="settings-icon" src="https://i.postimg.cc/wvpRcThF/Open.png" alt="Ouvrir">
+  </div>
+</div>
+
 <div class="filter-bar" id="filter-bar">
   <div class="filter-btn active" id="filter-tout" onclick="setFilter('tout')">Tout</div>
   <div class="filter-btn" id="filter-serie" onclick="setFilter('serie')">Séries</div>
@@ -138,7 +153,7 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
     <span>Rechercher</span>
   </div>
   <div class="bar-btn" id="btn-settings" onclick="setPage('settings')">
-    <img src="https://i.postimg.cc/wvpRcThF/Open.png" alt="Settings">
+    <span style="font-size:24px;opacity:0.35;transition:opacity 0.15s" id="settings-icon">⚙️</span>
     <span>Paramètres</span>
   </div>
 </div>
