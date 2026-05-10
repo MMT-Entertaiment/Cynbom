@@ -323,14 +323,28 @@ function afficherContenu() {
     </div>`;
   }
 
+  function sectionsByGenre(items, typeLabel) {
+    const genres = {};
+    items.forEach(s => {
+      const genre = (s.genre || '').replace(/^(série|film|ost)\s*\|\s*/i, '').trim() || 'Autre';
+      if (!genres[genre]) genres[genre] = [];
+      genres[genre].push(s);
+    });
+    let h = '';
+    Object.entries(genres).forEach(([genre, list]) => {
+      h += `<div class="section"><div class="section-title">${genre}</div><div class="row">${list.map(vignetteHTML).join('')}</div></div>`;
+    });
+    return h;
+  }
+
   if (filtreActuel !== 'film' && filtreActuel !== 'ost' && series.length > 0)
-    html += `<div class="section"><div class="section-title">Séries</div><div class="row">${series.map(vignetteHTML).join('')}</div></div>`;
+    html += sectionsByGenre(series, 'Série');
 
   if (filtreActuel !== 'serie' && filtreActuel !== 'ost' && films.length > 0)
-    html += `<div class="section"><div class="section-title">Films</div><div class="row">${films.map(vignetteHTML).join('')}</div></div>`;
+    html += sectionsByGenre(films, 'Film');
 
   if ((filtreActuel === 'tout' || filtreActuel === 'ost') && osts.length > 0)
-    html += `<div class="section"><div class="section-title">OST</div><div class="row">${osts.map(vignetteHTML).join('')}</div></div>`;
+    html += sectionsByGenre(osts, 'OST');
 
   if (bientot.length > 0)
     html += `<div class="section"><div class="section-title">Arrive bientôt</div><div class="row">${bientot.map(bientotCardHTML).join('')}</div></div>`;
