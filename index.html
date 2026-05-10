@@ -142,6 +142,7 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
   <div class="filter-btn active" id="filter-tout" onclick="setFilter('tout')">Tout</div>
   <div class="filter-btn" id="filter-serie" onclick="setFilter('serie')">Séries</div>
   <div class="filter-btn" id="filter-film" onclick="setFilter('film')">Films</div>
+  <div class="filter-btn" id="filter-ost" onclick="setFilter('ost')">OST</div>
 </div>
 
 <!-- BOTTOM BAR -->
@@ -322,13 +323,13 @@ function afficherContenu() {
     </div>`;
   }
 
-  if (filtreActuel !== 'film' && series.length > 0)
+  if (filtreActuel !== 'film' && filtreActuel !== 'ost' && series.length > 0)
     html += `<div class="section"><div class="section-title">Séries</div><div class="row">${series.map(vignetteHTML).join('')}</div></div>`;
 
-  if (filtreActuel !== 'serie' && films.length > 0)
+  if (filtreActuel !== 'serie' && filtreActuel !== 'ost' && films.length > 0)
     html += `<div class="section"><div class="section-title">Films</div><div class="row">${films.map(vignetteHTML).join('')}</div></div>`;
 
-  if (filtreActuel !== 'film' && filtreActuel !== 'serie' && osts.length > 0)
+  if ((filtreActuel === 'tout' || filtreActuel === 'ost') && osts.length > 0)
     html += `<div class="section"><div class="section-title">OST</div><div class="row">${osts.map(vignetteHTML).join('')}</div></div>`;
 
   if (bientot.length > 0)
@@ -379,4 +380,4 @@ async function chargerSeries() {
 chargerSeries();
 </script>
 </body>
-    </html>
+</html>
