@@ -68,7 +68,7 @@
   .ost-timebar { width: 100%; height: 4px; background: #1a1a1a; border-radius: 2px; margin-top: 16px; position: relative; cursor: pointer; }
   .ost-timebar-progress { height: 100%; background: #fff; border-radius: 2px; width: 0%; transition: width 0.1s linear; }
   .ost-timeinfo { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; font-size: 12px; color: #666; }
-  .ost-iframe-hidden { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  #ost-iframe-container { position: absolute; left: -9999px; }
   .ep-play.has-video svg { fill: #fff; }
   .ep-card.locked { opacity: 0.4; cursor: not-allowed; }
   .ep-play.locked-icon { border-color: #333; }
@@ -278,31 +278,61 @@
   let ostEpisodes = [];
   let ostUpdateInterval = null;
 
+  function onYouTubeIframeAPIReady() {
+    console.log('YouTube API ready');
+  }
+
   function ostLoadTrack(index) {
     if (index < 0 || index >= ostEpisodes.length) return;
     ostCurrentIndex = index;
     const ep = ostEpisodes[index];
     const videoId = getYouTubeId(ep.video);
-    if (!videoId) return;
+    if (!videoId) { console.error('Invalid video ID'); return; }
 
-    document.getElementById('ost-iframe-container').innerHTML = `<iframe id="ost-iframe" class="ost-iframe-hidden" src="https://www.youtube.com/embed/${videoId}?enablejsapi=1&autoplay=1" allow="autoplay"></iframe>`;
-    
     document.querySelectorAll('.ep-card').forEach(c => c.classList.remove('active-ep'));
     document.getElementById(`ep-${ep.saison}-${ep.numero}`)?.classList.add('active-ep');
-    
     document.getElementById('ost-track').textContent = `${index + 1} / ${ostEpisodes.length}`;
-    document.getElementById('ost-play-btn').src = 'https://i.postimg.cc/T1YyBKrJ/Pause.png';
 
-    if (ostUpdateInterval) clearInterval(ostUpdateInterval);
-    ostUpdateInterval = setInterval(ostUpdateTime, 1000);
+    if (ostPlayer) {
+      ostPlayer.loadVideoById(videoId);
+      ostPlayer.playVideo();
+    } else {
+      const container = document.getElementById('ost-iframe-container');
+      container.innerHTML = '<div id="ost-yt-player"></div>';
+      
+      ostPlayer = new YT.Player('ost-yt-player', {
+        height: '1',
+        width: '1',
+        videoId: videoId,
+        playerVars: { autoplay: 1, controls: 0 },
+        events: {
+          onReady: (e) => { 
+            e.target.playVideo();
+            if (ostUpdateInterval) clearInterval(ostUpdateInterval);
+            ostUpdateInterval = setInterval(ostUpdateTime, 500);
+          },
+          onStateChange: (e) => {
+            if (e.data === YT.PlayerState.PLAYING) {
+              document.getElementById('ost-play-btn').src = 'https://i.postimg.cc/T1YyBKrJ/Pause.png';
+            } else if (e.data === YT.PlayerState.PAUSED) {
+              document.getElementById('ost-play-btn').src = 'https://i.postimg.cc/0j26hzpZ/Play.png';
+            } else if (e.data === YT.PlayerState.ENDED) {
+              ostNext();
+            }
+          }
+        }
+      });
+    }
   }
 
   function ostTogglePlay() {
-    const iframe = document.getElementById('ost-iframe');
-    if (!iframe) return;
-    const isPaused = document.getElementById('ost-play-btn').src.includes('Play');
-    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: isPaused ? 'playVideo' : 'pauseVideo' }), '*');
-    document.getElementById('ost-play-btn').src = isPaused ? 'https://i.postimg.cc/T1YyBKrJ/Pause.png' : 'https://i.postimg.cc/0j26hzpZ/Play.png';
+    if (!ostPlayer) return;
+    const state = ostPlayer.getPlayerState();
+    if (state === YT.PlayerState.PLAYING) {
+      ostPlayer.pauseVideo();
+    } else {
+      ostPlayer.playVideo();
+    }
   }
 
   function ostPrevious() {
@@ -314,39 +344,26 @@
   }
 
   function ostSeek(e) {
+    if (!ostPlayer) return;
     const bar = e.currentTarget;
     const percent = (e.clientX - bar.getBoundingClientRect().left) / bar.offsetWidth;
-    const iframe = document.getElementById('ost-iframe');
-    if (iframe) iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'seekTo', args: [percent * ostDuration, true] }), '*');
+    const duration = ostPlayer.getDuration();
+    ostPlayer.seekTo(percent * duration, true);
   }
 
-  let ostDuration = 0;
   function ostUpdateTime() {
-    const iframe = document.getElementById('ost-iframe');
-    if (!iframe) return;
-    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getCurrentTime' }), '*');
-    iframe.contentWindow.postMessage(JSON.stringify({ event: 'command', func: 'getDuration' }), '*');
-  }
-
-  window.addEventListener('message', (e) => {
-    if (e.origin !== 'https://www.youtube.com') return;
+    if (!ostPlayer || !ostPlayer.getCurrentTime) return;
     try {
-      const data = JSON.parse(e.data);
-      if (data.event === 'infoDelivery' && data.info) {
-        if (data.info.currentTime !== undefined) {
-          const current = Math.floor(data.info.currentTime);
-          const duration = Math.floor(data.info.duration || ostDuration);
-          ostDuration = duration;
-          const currentMin = Math.floor(current / 60);
-          const currentSec = (current % 60).toString().padStart(2, '0');
-          const durationMin = Math.floor(duration / 60);
-          const durationSec = (duration % 60).toString().padStart(2, '0');
-          document.getElementById('ost-time').textContent = `${currentMin}:${currentSec} / ${durationMin}:${durationSec}`;
-          document.getElementById('ost-progress').style.width = duration > 0 ? ((current / duration) * 100) + '%' : '0%';
-        }
-      }
-    } catch {}
-  });
+      const current = Math.floor(ostPlayer.getCurrentTime() || 0);
+      const duration = Math.floor(ostPlayer.getDuration() || 0);
+      const currentMin = Math.floor(current / 60);
+      const currentSec = (current % 60).toString().padStart(2, '0');
+      const durationMin = Math.floor(duration / 60);
+      const durationSec = (duration % 60).toString().padStart(2, '0');
+      document.getElementById('ost-time').textContent = `${currentMin}:${currentSec} / ${durationMin}:${durationSec}`;
+      document.getElementById('ost-progress').style.width = duration > 0 ? ((current / duration) * 100) + '%' : '0%';
+    } catch(e) { console.error('Update time error:', e); }
+  }
 
 </script>
 </body>
