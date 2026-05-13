@@ -234,7 +234,7 @@
         return isNaN(a) || isNaN(b) ? a.localeCompare(b) : Number(a) - Number(b);
       });
 
-      if (isOST) ostEpisodes = episodes;
+      if (isOST) { ostEpisodes = episodes; alert('OST détecté, ' + episodes.length + ' musiques chargées'); }
       epContainer.innerHTML = saisonKeys.map(saison => {
         const eps = saisons[saison];
         const isTrailer = saison.toLowerCase() === 'trailer';
