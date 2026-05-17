@@ -121,7 +121,7 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; max-wi
 <!-- PAGE RECHERCHE -->
 <div class="page" id="page-recherche">
   <div class="search-wrap">
-    <input class="search-input" id="search-input" type="text" placeholder="Rechercher..." oninput="rechercher()">
+    <input class="search-input" id="search-input" type="text" placeholder="Rechercher..." oninput="rechercher()" autocomplete="off">
   </div>
   <div class="search-results" id="search-results">
     <div class="no-results">Tapez pour rechercher</div>
@@ -298,9 +298,13 @@ function afficherContenu() {
   const bientot = toutesLesSeries.filter(s => estArriveBientot(s.titre));
   const actifs = toutesLesSeries.filter(s => !estArriveBientot(s.titre));
   const vedette = actifs.find(s => s.vedette);
-  const series = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('série'));
-  const films = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('film'));
-  const osts = actifs.filter(s => !s.vedette && (s.genre || '').toLowerCase().includes('ost'));
+  function estArriveBientot(titre) {
+    const t = titre.toLowerCase();
+    return t.includes('(arrive bientôt)') || t.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t);
+  }
+  const series = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('série'));
+  const films = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('film'));
+  const osts = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('ost'));
 
   let html = '';
 
