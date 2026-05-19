@@ -191,6 +191,11 @@ let toutesLesSeries = [];
 let etoile = 0;
 let filtreActuel = 'tout';
 
+function estArriveBientot(titre) {
+  const t = titre.toLowerCase();
+  return t.includes('(arrive bientôt)') || t.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t);
+}
+
 // POPUP
 document.getElementById('overlay').addEventListener('click', function(e) { if (e.target === this) fermerRate(); });
 document.getElementById('btn-cancel').addEventListener('click', fermerRate);
@@ -252,6 +257,11 @@ function extraireDate(titre) {
   const match = titre.match(/\(arrive le (\d{2}\/\d{2}\/\d{4})\)/i);
   return match ? match[1] : 'Bientôt';
 }
+function estArriveBientot(titre) {
+  const t = titre.toLowerCase();
+  return t.includes('(arrive bientôt)') || t.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t);
+}
+
 function titrePropre(titre) {
   return titre.replace(/\(arrive bientôt\)/gi, '').replace(/\(arrive bientot\)/gi, '').replace(/\(arrive le \d{2}\/\d{2}\/\d{4}\)/gi, '').trim();
 }
@@ -298,10 +308,6 @@ function afficherContenu() {
   const bientot = toutesLesSeries.filter(s => estArriveBientot(s.titre));
   const actifs = toutesLesSeries.filter(s => !estArriveBientot(s.titre));
   const vedette = actifs.find(s => s.vedette);
-  function estArriveBientot(titre) {
-    const t = titre.toLowerCase();
-    return t.includes('(arrive bientôt)') || t.includes('(arrive bientot)') || /\(arrive le \d{2}\/\d{2}\/\d{4}\)/.test(t);
-  }
   const series = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('série'));
   const films = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('film'));
   const osts = actifs.filter(s => !s.vedette && !estArriveBientot(s.titre) && (s.genre || '').toLowerCase().includes('ost'));
