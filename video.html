@@ -14,10 +14,6 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
 .player { width: 100%; height: 100%; aspect-ratio: 16/9; }
 .player iframe { width: 100%; height: 100%; border: none; display: block; }
 
-.exit-hint { position: fixed; top: 20px; left: 20px; z-index: 9999; padding: 12px 16px; background: rgba(0,0,0,0.7); border: 0.5px solid #333; border-radius: 8px; font-size: 12px; color: #999; cursor: pointer; }
-.exit-hint:hover { color: #fff; background: rgba(0,0,0,0.9); }
-.exit-hint svg { width: 16px; height: 16px; display: inline-block; margin-right: 8px; }
-
 .episodes-nav { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; gap: 12px; }
 .ep-btn { padding: 8px 14px; background: rgba(0,0,0,0.7); border: 0.5px solid #555; border-radius: 6px; font-size: 12px; color: #fff; cursor: pointer; transition: all 0.2s; }
 .ep-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: #fff; }
@@ -33,12 +29,6 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
 
 <div class="player-container">
   <div class="player" id="player"></div>
-</div>
-<div class="exit-hint" onclick="goBack()">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-    <polyline points="15 18 9 12 15 6"></polyline>
-  </svg>
-  Retour
 </div>
 
 <div class="episodes-nav">
@@ -68,12 +58,19 @@ function getYouTubeId(url) {
 function parseEpisodeParam(param) {
   if (!param) return null;
   
-  // Format: S01E09 or E09.S01
-  const match1 = param.match(/S(\d+)E(\d+)/i);
-  if (match1) return { saison: match1[1], numero: parseInt(match1[2], 10) };
+  // Format: S01E09 (saison numérique) or SShortE01 (saison textuelle) or E09.S01 (autre)
   
-  const match2 = param.match(/E(\d+)\.S(\d+)/i);
-  if (match2) return { saison: match2[2], numero: parseInt(match2[1], 10) };
+  // Format: SxxxxxExxx (saison textuelle)
+  const textMatch = param.match(/S([a-z]+)E(\d+)/i);
+  if (textMatch) return { saison: textMatch[1], numero: parseInt(textMatch[2], 10) };
+  
+  // Format: S01E09 (saison numérique)
+  const numMatch = param.match(/S(\d+)E(\d+)/i);
+  if (numMatch) return { saison: numMatch[1], numero: parseInt(numMatch[2], 10) };
+  
+  // Format: E09.S01 (alternative)
+  const altMatch = param.match(/E(\d+)\.S(.+)/i);
+  if (altMatch) return { saison: altMatch[2], numero: parseInt(altMatch[1], 10) };
   
   return null;
 }
@@ -179,31 +176,23 @@ async function init() {
     // Update navigation buttons
     updateNavigationButtons();
 
-    // Charger le player YouTube
-    player = new YT.Player('player', {
-      videoId: videoId,
-      playerVars: {
-        autoplay: 1,
-        fs: 1,
-        rel: 0,
-        controls: 1,
-        modestbranding: 1
-      },
-      events: {
-        onReady: onPlayerReady,
-        onStateChange: onPlayerStateChange
-      }
-    });
-
-    // Mettre en fullscreen après le chargement
-    setTimeout(() => {
-      const playerElem = document.querySelector('iframe');
-      if (playerElem && playerElem.requestFullscreen) {
-        playerElem.requestFullscreen().catch(() => {
-          // Fullscreen peut être bloqué, c'est OK
-        });
-      }
-    }, 500);
+    // Attendre que YT API soit prête
+    if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
+      // YT pas encore chargé, attendre
+      let attempts = 0;
+      const waitForYT = setInterval(() => {
+        attempts++;
+        if (typeof YT !== 'undefined' && typeof YT.Player !== 'undefined') {
+          clearInterval(waitForYT);
+          loadYouTubePlayer(videoId);
+        } else if (attempts > 50) {
+          clearInterval(waitForYT);
+          document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur: YouTube API non disponible</div>';
+        }
+      }, 100);
+    } else {
+      loadYouTubePlayer(videoId);
+    }
 
   } catch (e) {
     console.error(e);
@@ -213,6 +202,32 @@ async function init() {
 
 function onPlayerReady(event) {
   // Player prêt
+  // Mettre en fullscreen après le chargement
+  setTimeout(() => {
+    const playerElem = document.querySelector('iframe');
+    if (playerElem && playerElem.requestFullscreen) {
+      playerElem.requestFullscreen().catch(() => {
+        // Fullscreen peut être bloqué, c'est OK
+      });
+    }
+  }, 500);
+}
+
+function loadYouTubePlayer(videoId) {
+  player = new YT.Player('player', {
+    videoId: videoId,
+    playerVars: {
+      autoplay: 1,
+      fs: 1,
+      rel: 0,
+      controls: 1,
+      modestbranding: 1
+    },
+    events: {
+      onReady: onPlayerReady,
+      onStateChange: onPlayerStateChange
+    }
+  });
 }
 
 function onPlayerStateChange(event) {
