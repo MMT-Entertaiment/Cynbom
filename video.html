@@ -124,48 +124,55 @@ window.addEventListener('beforeunload', () => {
 
 async function init() {
   if (!serieTitle || !epParam) {
-    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Paramètres manquants</div>';
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Paramètres manquants: serie=' + serieTitle + ', ep=' + epParam + '</div>';
     return;
   }
 
   try {
     // Récupérer la série
     const resServe = await fetch(`${API}/series`);
+    if (!resServe.ok) throw new Error('Erreur API séries: ' + resServe.status);
     const series = await resServe.json();
     const serie = series.find(s => s.titre === serieTitle);
     
     if (!serie) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Série introuvable</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Série introuvable: ' + serieTitle + '</div>';
       return;
     }
 
     // Récupérer les épisodes
     const resEp = await fetch(`${API}/series/${encodeURIComponent(serieTitle)}/episodes`);
+    if (!resEp.ok) throw new Error('Erreur API épisodes: ' + resEp.status);
     allEpisodes = await resEp.json();
     
     // Parser le paramètre d'épisode
     const epData = parseEpisodeParam(epParam);
     if (!epData) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Format d\'épisode invalide</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Format d\'épisode invalide: ' + epParam + '</div>';
       return;
     }
 
     // Trouver l'épisode et son index
     currentEpisodeIndex = allEpisodes.findIndex(ep => 
-      String(ep.saison) === String(epData.saison) && String(ep.numero) === String(epData.numero)
+      String(ep.saison) === String(epData.saison) && ep.numero == epData.numero
     );
 
-    if (currentEpisodeIndex === -1 || !allEpisodes[currentEpisodeIndex].video) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Épisode ou vidéo introuvable</div>';
+    if (currentEpisodeIndex === -1) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Épisode S' + epData.saison + 'E' + epData.numero + ' introuvable</div>';
       return;
     }
 
     const episode = allEpisodes[currentEpisodeIndex];
+    if (!episode.video) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Pas de vidéo pour cet épisode</div>';
+      return;
+    }
+
     videoUrl = episode.video;
     const videoId = getYouTubeId(videoUrl);
     
     if (!videoId) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">URL YouTube invalide</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">URL YouTube invalide: ' + videoUrl + '</div>';
       return;
     }
 
@@ -200,7 +207,7 @@ async function init() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur de chargement</div>';
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur: ' + e.message + '</div>';
   }
 }
 
