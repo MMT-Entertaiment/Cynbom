@@ -152,7 +152,7 @@ async function init() {
 
     // Trouver l'épisode et son index
     currentEpisodeIndex = allEpisodes.findIndex(ep => 
-      ep.saison == epData.saison && ep.numero == epData.numero
+      String(ep.saison) === String(epData.saison) && String(ep.numero) === String(epData.numero)
     );
 
     if (currentEpisodeIndex === -1 || !allEpisodes[currentEpisodeIndex].video) {
