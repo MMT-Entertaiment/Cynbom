@@ -68,12 +68,12 @@ function getYouTubeId(url) {
 function parseEpisodeParam(param) {
   if (!param) return null;
   
-  // Format: S01E01 or E01.S01
+  // Format: S01E09 or E09.S01
   const match1 = param.match(/S(\d+)E(\d+)/i);
-  if (match1) return { saison: match1[1], numero: match1[2] };
+  if (match1) return { saison: match1[1], numero: parseInt(match1[2], 10) };
   
   const match2 = param.match(/E(\d+)\.S(\d+)/i);
-  if (match2) return { saison: match2[2], numero: match2[1] };
+  if (match2) return { saison: match2[2], numero: parseInt(match2[1], 10) };
   
   return null;
 }
