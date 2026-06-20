@@ -270,7 +270,7 @@ function titrePropre(titre) {
 function vignetteHTML(s) {
   const titre = titrePropre(s.titre);
   const isOST = (s.genre || '').toLowerCase().includes('ost');
-  return `<div class="vignette${isOST ? ' ost' : ''}" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
+  return `<div class="vignette${isOST ? ' ost' : ''}" onclick="ouvrirSerie('${s.url_id}')">
     ${s.image ? `<img src="${s.image}" alt="${titre}">` : `<div class="vignette-placeholder">${titre}</div>`}
     <div class="vignette-title">${titre}</div>
   </div>`;
@@ -278,7 +278,7 @@ function vignetteHTML(s) {
 function bientotCardHTML(s) {
   const titre = titrePropre(s.titre);
   const date = extraireDate(s.titre);
-  return `<div class="bientot-card" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
+  return `<div class="bientot-card" onclick="ouvrirSerie('${s.url_id}')">
     ${s.image ? `<img class="bientot-img" src="${s.image}" alt="${titre}">` : `<div class="bientot-placeholder">${titre}</div>`}
     <div class="bientot-title">${titre}</div>
     <div class="bientot-date">${date}</div>
@@ -286,7 +286,7 @@ function bientotCardHTML(s) {
 }
 function serieCardHTML(s) {
   const titre = titrePropre(s.titre);
-  return `<div class="serie-card" onclick="ouvrirSerie('${encodeURIComponent(s.titre)}')">
+  return `<div class="serie-card" onclick="ouvrirSerie('${s.url_id}')">
     ${s.image ? `<img class="serie-thumb" src="${s.image}" alt="${titre}">` : `<div class="serie-thumb-placeholder">${titre}</div>`}
     <div class="serie-info">
       <div class="serie-title-text">${titre}</div>
@@ -320,14 +320,14 @@ function afficherContenu() {
     (filtreActuel === 'film' && (vedette.genre||'').toLowerCase().includes('film')));
 
   if (afficherVedette) {
-    html += `<div class="vedette-section" onclick="ouvrirSerie('${encodeURIComponent(vedette.titre)}')">
+    html += `<div class="vedette-section" onclick="ouvrirSerie('${vedette.url_id}')">
       ${vedette.image ? `<img class="vedette-img" src="${vedette.image}" alt="${titrePropre(vedette.titre)}">` : `<div style="width:100%;height:220px;background:#111;display:flex;align-items:center;justify-content:center;color:#333;font-size:13px;">${titrePropre(vedette.titre)}</div>`}
       <div class="vedette-gradient"></div>
       <div class="vedette-info">
         <div class="vedette-title">${titrePropre(vedette.titre)}</div>
         <div class="vedette-actions">
-          <button class="btn-regarder" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">▶ Regarder</button>
-          <button class="btn-savoir" onclick="event.stopPropagation();ouvrirSerie('${encodeURIComponent(vedette.titre)}')">En savoir plus</button>
+          <button class="btn-regarder" onclick="event.stopPropagation();ouvrirSerie('${vedette.url_id}')">▶ Regarder</button>
+          <button class="btn-savoir" onclick="event.stopPropagation();ouvrirSerie('${vedette.url_id}')">En savoir plus</button>
         </div>
       </div>
     </div>`;
@@ -397,7 +397,7 @@ function rechercher() {
   results.innerHTML = scored.length === 0 ? `<div class="no-results">Aucun résultat pour "${q}"</div>` : scored.map(serieCardHTML).join('');
 }
 
-function ouvrirSerie(titre) { window.location.href = `serie.html?titre=${titre}`; }
+function ouvrirSerie(urlId) { window.location.href = `serie.html?ID=${urlId}`; }
 
 async function chargerSeries() {
   try {
