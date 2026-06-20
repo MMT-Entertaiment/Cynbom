@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vidéo - Cynbom</title>
+<script src="https://www.youtube.com/iframe_api"></script>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+.player-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
+.player { width: 100%; height: 100%; aspect-ratio: 16/9; }
+.player iframe { width: 100%; height: 100%; border: none; display: block; }
+
+.exit-hint { position: fixed; top: 20px; left: 20px; z-index: 9999; padding: 12px 16px; background: rgba(0,0,0,0.7); border: 0.5px solid #333; border-radius: 8px; font-size: 12px; color: #999; cursor: pointer; }
+.exit-hint:hover { color: #fff; background: rgba(0,0,0,0.9); }
+.exit-hint svg { width: 16px; height: 16px; display: inline-block; margin-right: 8px; }
+
+.episodes-nav { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; gap: 12px; }
+.ep-btn { padding: 8px 14px; background: rgba(0,0,0,0.7); border: 0.5px solid #555; border-radius: 6px; font-size: 12px; color: #fff; cursor: pointer; transition: all 0.2s; }
+.ep-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); border-color: #fff; }
+.ep-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+@media (max-aspect-ratio: 16/9) {
+  .player { width: 100%; height: auto; }
+  body { align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<div class="player-container">
+  <div class="player" id="player"></div>
+</div>
+<div class="exit-hint" onclick="goBack()">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="15 18 9 12 15 6"></polyline>
+  </svg>
+  Retour
+</div>
+
+<div class="episodes-nav">
+  <button class="ep-btn" id="prev-btn" onclick="prevEpisode()" disabled>← Précédent</button>
+  <button class="ep-btn" id="next-btn" onclick="nextEpisode()" disabled>Suivant →</button>
+</div>
+
+<script>
+const API = 'https://cynbom-backend-production.up.railway.app';
+const urlParams = new URLSearchParams(window.location.search);
+const serieTitle = urlParams.get('serie');
+const epParam = urlParams.get('ep'); // Format: S01E01 ou E01.S01
+
+let player;
+let videoUrl = null;
+let allEpisodes = [];
+let currentEpisodeIndex = -1;
+
+function getYouTubeId(url) {
+  if (!url) return null;
+  const shortMatch = url.match(/youtu\.be\/([^?]+)/);
+  if (shortMatch) return shortMatch[1];
+  const longMatch = url.match(/[?&]v=([^&]+)/);
+  return longMatch ? longMatch[1] : null;
+}
+
+function parseEpisodeParam(param) {
+  if (!param) return null;
+  
+  // Format: S01E01 or E01.S01
+  const match1 = param.match(/S(\d+)E(\d+)/i);
+  if (match1) return { saison: match1[1], numero: match1[2] };
+  
+  const match2 = param.match(/E(\d+)\.S(\d+)/i);
+  if (match2) return { saison: match2[2], numero: match2[1] };
+  
+  return null;
+}
+
+function goBack() {
+  if (serieTitle) {
+    window.location.href = `serie.html?titre=${encodeURIComponent(serieTitle)}`;
+  } else {
+    history.back();
+  }
+}
+
+function updateNavigationButtons() {
+  const prevBtn = document.getElementById('prev-btn');
+  const nextBtn = document.getElementById('next-btn');
+  
+  prevBtn.disabled = currentEpisodeIndex <= 0;
+  nextBtn.disabled = currentEpisodeIndex >= allEpisodes.length - 1;
+}
+
+function prevEpisode() {
+  if (currentEpisodeIndex > 0) {
+    const prevEp = allEpisodes[currentEpisodeIndex - 1];
+    const epParam = `S${prevEp.saison.toString().padStart(2, '0')}E${prevEp.numero.toString().padStart(2, '0')}`;
+    window.location.href = `video.html?serie=${encodeURIComponent(serieTitle)}&ep=${epParam}`;
+  }
+}
+
+function nextEpisode() {
+  if (currentEpisodeIndex < allEpisodes.length - 1) {
+    const nextEp = allEpisodes[currentEpisodeIndex + 1];
+    const epParam = `S${nextEp.saison.toString().padStart(2, '0')}E${nextEp.numero.toString().padStart(2, '0')}`;
+    window.location.href = `video.html?serie=${encodeURIComponent(serieTitle)}&ep=${epParam}`;
+  }
+}
+
+// Detect fullscreen exit
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement && serieTitle) {
+    goBack();
+  }
+});
+
+// Fallback for when user clicks back/escape
+window.addEventListener('beforeunload', () => {
+  // Nettoyage si nécessaire
+});
+
+async function init() {
+  if (!serieTitle || !epParam) {
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Paramètres manquants</div>';
+    return;
+  }
+
+  try {
+    // Récupérer la série
+    const resServe = await fetch(`${API}/series`);
+    const series = await resServe.json();
+    const serie = series.find(s => s.titre === serieTitle);
+    
+    if (!serie) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Série introuvable</div>';
+      return;
+    }
+
+    // Récupérer les épisodes
+    const resEp = await fetch(`${API}/series/${encodeURIComponent(serieTitle)}/episodes`);
+    allEpisodes = await resEp.json();
+    
+    // Parser le paramètre d'épisode
+    const epData = parseEpisodeParam(epParam);
+    if (!epData) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Format d\'épisode invalide</div>';
+      return;
+    }
+
+    // Trouver l'épisode et son index
+    currentEpisodeIndex = allEpisodes.findIndex(ep => 
+      ep.saison == epData.saison && ep.numero == epData.numero
+    );
+
+    if (currentEpisodeIndex === -1 || !allEpisodes[currentEpisodeIndex].video) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Épisode ou vidéo introuvable</div>';
+      return;
+    }
+
+    const episode = allEpisodes[currentEpisodeIndex];
+    videoUrl = episode.video;
+    const videoId = getYouTubeId(videoUrl);
+    
+    if (!videoId) {
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">URL YouTube invalide</div>';
+      return;
+    }
+
+    // Update navigation buttons
+    updateNavigationButtons();
+
+    // Charger le player YouTube
+    player = new YT.Player('player', {
+      videoId: videoId,
+      playerVars: {
+        autoplay: 1,
+        fs: 1,
+        rel: 0,
+        controls: 1,
+        modestbranding: 1
+      },
+      events: {
+        onReady: onPlayerReady,
+        onStateChange: onPlayerStateChange
+      }
+    });
+
+    // Mettre en fullscreen après le chargement
+    setTimeout(() => {
+      const playerElem = document.querySelector('iframe');
+      if (playerElem && playerElem.requestFullscreen) {
+        playerElem.requestFullscreen().catch(() => {
+          // Fullscreen peut être bloqué, c'est OK
+        });
+      }
+    }, 500);
+
+  } catch (e) {
+    console.error(e);
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur de chargement</div>';
+  }
+}
+
+function onPlayerReady(event) {
+  // Player prêt
+}
+
+function onPlayerStateChange(event) {
+  // Optionnel: gérer les changements d'état
+  // 0 = fin, 1 = lecture, 2 = pause, -1 = non démarré
+}
+
+// Détection de sortie via ESC ou back button
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    goBack();
+  }
+});
+
+init();
+</script>
+</body>
+</html>
