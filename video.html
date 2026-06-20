@@ -154,7 +154,7 @@ async function init() {
 
     // Trouver l'épisode et son index
     currentEpisodeIndex = allEpisodes.findIndex(ep => 
-      String(ep.saison) === String(epData.saison) && ep.numero == epData.numero
+      String(parseInt(ep.saison)) === String(parseInt(epData.saison)) && ep.numero == epData.numero
     );
 
     if (currentEpisodeIndex === -1) {
