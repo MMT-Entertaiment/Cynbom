@@ -71,7 +71,9 @@ function getYouTubeId(url) {
 
 function playVideoInModal(serieTitle, saison, numero) {
   // Rediriger vers video.html
-  const epParam = `S${saison.toString().padStart(2, '0')}E${numero.toString().padStart(2, '0')}`;
+  // Format: S01E01 pour saisons numériques, SShortsE01 pour textuelles
+  const saisonParam = isNaN(saison) ? saison : saison.toString().padStart(2, '0');
+  const epParam = `S${saisonParam}E${numero.toString().padStart(2, '0')}`;
   window.location.href = `video.html?serie=${encodeURIComponent(serieTitle)}&ep=${epParam}`;
 }
 
