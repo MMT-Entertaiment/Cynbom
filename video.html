@@ -278,13 +278,17 @@ async function init() {
 }
 
 function onPlayerReady(event) {
-  // Player prêt - mettre en fullscreen immédiatement
-  const playerElem = document.querySelector('iframe');
-  if (playerElem && playerElem.requestFullscreen) {
-    playerElem.requestFullscreen().catch(() => {
-      // Fullscreen peut être bloqué, c'est OK
-    });
-  }
+  // Player prêt - afficher les boutons et mettre en fullscreen
+  showControls();
+  
+  setTimeout(() => {
+    const playerElem = document.querySelector('iframe');
+    if (playerElem && playerElem.requestFullscreen) {
+      playerElem.requestFullscreen().catch((err) => {
+        console.log('Fullscreen erreur:', err);
+      });
+    }
+  }, 100);
 }
 
 function loadYouTubePlayer(videoId) {
@@ -333,9 +337,6 @@ function showControls() {
 playerContainer.addEventListener('mousemove', showControls);
 playerContainer.addEventListener('touchstart', showControls);
 playerContainer.addEventListener('touchmove', showControls);
-
-// Afficher les boutons au démarrage pendant 3 secondes
-showControls();
 
 init();
 
