@@ -8,11 +8,91 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
-body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; }
+body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 
-.player-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
-.player { width: 100%; height: 100%; aspect-ratio: 16/9; }
-.player iframe { width: 100%; height: 100%; border: none; display: block; }
+.player-container { 
+  width: 100%; 
+  height: 100%; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center; 
+  background: #000; 
+  position: relative; 
+}
+
+.player { 
+  width: 100%; 
+  height: 100%; 
+  aspect-ratio: 16/9; 
+}
+
+.player-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+.player-wrapper iframe { 
+  width: 100%; 
+  height: 100%; 
+  border: none; 
+  display: block; 
+}
+
+/* Contrôles custom */
+.player-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 40px;
+  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 16px;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s;
+  gap: 8px;
+}
+
+.player-controls.visible {
+  opacity: 1;
+}
+
+.control-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  transition: all 0.2s;
+  min-width: 36px;
+  height: 36px;
+}
+
+.control-btn svg {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+
+.control-btn:hover:not(:disabled) svg {
+  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
+  transform: scale(1.1);
+}
+
+.control-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.control-btn:disabled svg {
+  fill: #666;
+}
 
 /* État: Pas de vidéo/Erreur */
 .player-container.error-state {
@@ -31,56 +111,8 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   color: #999;
 }
 
-.player-container.error-state .episodes-nav {
+.player-container.error-state .player-controls {
   display: none;
-}
-
-.episodes-nav { 
-  position: absolute; 
-  bottom: 48px; 
-  left: 50%; 
-  transform: translateX(-50%); 
-  z-index: 9999; 
-  display: flex; 
-  gap: 16px; 
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-.episodes-nav.visible {
-  opacity: 1;
-}
-
-.ep-btn { 
-  background: none; 
-  border: none; 
-  cursor: pointer; 
-  transition: all 0.2s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px;
-}
-
-.ep-btn svg {
-  width: 28px;
-  height: 28px;
-  fill: #fff;
-  filter: drop-shadow(0 0 2px rgba(0,0,0,0.5));
-}
-
-.ep-btn:hover:not(:disabled) svg {
-  filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
-  transform: scale(1.1);
-}
-
-.ep-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
-}
-
-.ep-btn:disabled svg {
-  fill: #666;
 }
 
 @media (max-aspect-ratio: 16/9) {
@@ -92,14 +124,16 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
 <body>
 
 <div class="player-container" id="player-container">
-  <div class="player" id="player"></div>
-  <div class="episodes-nav" id="episodes-nav">
-    <button class="ep-btn" id="prev-btn" onclick="prevEpisode()" disabled title="Épisode précédent">
-      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M220-280v-400q0-17 11.5-28.5T260-720q17 0 28.5 11.5T300-680v400q0 17-11.5 28.5T260-240q-17 0-28.5-11.5T220-280Zm458-1L430-447q-9-6-13.5-14.5T412-480q0-10 4.5-18.5T430-513l248-166q5-4 11-5t11-1q16 0 28 11t12 29v330q0 18-12 29t-28 11q-5 0-11-1t-11-5Z"/></svg>
-    </button>
-    <button class="ep-btn" id="next-btn" onclick="nextEpisode()" disabled title="Épisode suivant">
-      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M660-280v-400q0-17 11.5-28.5T700-720q17 0 28.5 11.5T740-680v400q0 17-11.5 28.5T700-240q-17 0-28.5-11.5T660-280Zm-440-35v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T548-480q0 10-4.5 18.5T530-447L282-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29Z"/></svg>
-    </button>
+  <div class="player-wrapper">
+    <div class="player" id="player"></div>
+    <div class="player-controls" id="player-controls">
+      <button class="control-btn" id="prev-btn" onclick="prevEpisode()" disabled title="Épisode précédent">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M220-280v-400q0-17 11.5-28.5T260-720q17 0 28.5 11.5T300-680v400q0 17-11.5 28.5T260-240q-17 0-28.5-11.5T220-280Zm458-1L430-447q-9-6-13.5-14.5T412-480q0-10 4.5-18.5T430-513l248-166q5-4 11-5t11-1q16 0 28 11t12 29v330q0 18-12 29t-28 11q-5 0-11-1t-11-5Z"/></svg>
+      </button>
+      <button class="control-btn" id="next-btn" onclick="nextEpisode()" disabled title="Épisode suivant">
+        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M660-280v-400q0-17 11.5-28.5T700-720q17 0 28.5 11.5T740-680v400q0 17-11.5 28.5T700-240q-17 0-28.5-11.5T660-280Zm-440-35v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T548-480q0 10-4.5 18.5T530-447L282-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29Z"/></svg>
+      </button>
+    </div>
   </div>
 </div>
 
@@ -107,12 +141,16 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
 const API = 'https://cynbom-backend-production.up.railway.app';
 const urlParams = new URLSearchParams(window.location.search);
 const serieTitle = urlParams.get('serie');
-const epParam = urlParams.get('ep'); // Format: S01E01 ou E01.S01
+const epParam = urlParams.get('ep');
 
 let player;
 let videoUrl = null;
 let allEpisodes = [];
 let currentEpisodeIndex = -1;
+let controlsHideTimer;
+const playerContainer = document.getElementById('player-container');
+const playerControls = document.getElementById('player-controls');
+const playerWrapper = document.querySelector('.player-wrapper');
 
 function getYouTubeId(url) {
   if (!url) return null;
@@ -125,17 +163,12 @@ function getYouTubeId(url) {
 function parseEpisodeParam(param) {
   if (!param) return null;
   
-  // Format: S01E09 (saison numérique) or SShortE01 (saison textuelle) or E09.S01 (autre)
-  
-  // Format: SxxxxxExxx (saison textuelle)
   const textMatch = param.match(/S([a-z]+)E(\d+)/i);
   if (textMatch) return { saison: textMatch[1], numero: parseInt(textMatch[2], 10) };
   
-  // Format: S01E09 (saison numérique)
   const numMatch = param.match(/S(\d+)E(\d+)/i);
   if (numMatch) return { saison: numMatch[1], numero: parseInt(numMatch[2], 10) };
   
-  // Format: E09.S01 (alternative)
   const altMatch = param.match(/E(\d+)\.S(.+)/i);
   if (altMatch) return { saison: altMatch[2], numero: parseInt(altMatch[1], 10) };
   
@@ -161,7 +194,8 @@ function updateNavigationButtons() {
 function prevEpisode() {
   if (currentEpisodeIndex > 0) {
     const prevEp = allEpisodes[currentEpisodeIndex - 1];
-    const epParam = `S${prevEp.saison.toString().padStart(2, '0')}E${prevEp.numero.toString().padStart(2, '0')}`;
+    const saisonParam = isNaN(prevEp.saison) ? prevEp.saison : prevEp.saison.toString().padStart(2, '0');
+    const epParam = `S${saisonParam}E${prevEp.numero.toString().padStart(2, '0')}`;
     window.location.href = `video.html?serie=${encodeURIComponent(serieTitle)}&ep=${epParam}`;
   }
 }
@@ -169,70 +203,88 @@ function prevEpisode() {
 function nextEpisode() {
   if (currentEpisodeIndex < allEpisodes.length - 1) {
     const nextEp = allEpisodes[currentEpisodeIndex + 1];
-    const epParam = `S${nextEp.saison.toString().padStart(2, '0')}E${nextEp.numero.toString().padStart(2, '0')}`;
+    const saisonParam = isNaN(nextEp.saison) ? nextEp.saison : nextEp.saison.toString().padStart(2, '0');
+    const epParam = `S${saisonParam}E${nextEp.numero.toString().padStart(2, '0')}`;
     window.location.href = `video.html?serie=${encodeURIComponent(serieTitle)}&ep=${epParam}`;
   }
 }
 
-// Detect fullscreen exit
+function showControls() {
+  playerControls.classList.add('visible');
+  clearTimeout(controlsHideTimer);
+  controlsHideTimer = setTimeout(() => {
+    playerControls.classList.remove('visible');
+  }, 3000);
+}
+
+playerWrapper.addEventListener('mousemove', showControls);
+playerWrapper.addEventListener('mouseenter', showControls);
+playerWrapper.addEventListener('click', showControls);
+playerWrapper.addEventListener('touchstart', showControls);
+playerWrapper.addEventListener('touchmove', showControls);
+playerWrapper.addEventListener('touchend', showControls);
+
+document.addEventListener('fullscreenchange', () => {
+  if (document.fullscreenElement) {
+    showControls();
+  }
+});
+
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    goBack();
+  }
+});
+
 document.addEventListener('fullscreenchange', () => {
   if (!document.fullscreenElement && serieTitle) {
     goBack();
   }
 });
 
-// Fallback for when user clicks back/escape
-window.addEventListener('beforeunload', () => {
-  // Nettoyage si nécessaire
-});
-
 async function init() {
   if (!serieTitle || !epParam) {
-    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Paramètres manquants: serie=' + serieTitle + ', ep=' + epParam + '</div>';
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Paramètres manquants</div>';
     document.getElementById('player-container').classList.add('error-state');
     return;
   }
 
   try {
-    // Récupérer la série
     const resServe = await fetch(`${API}/series`);
-    if (!resServe.ok) throw new Error('Erreur API séries: ' + resServe.status);
+    if (!resServe.ok) throw new Error('Erreur API séries');
     const series = await resServe.json();
     const serie = series.find(s => s.titre === serieTitle);
     
     if (!serie) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Série introuvable: ' + serieTitle + '</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Série introuvable</div>';
       document.getElementById('player-container').classList.add('error-state');
       return;
     }
 
-    // Récupérer les épisodes
     const resEp = await fetch(`${API}/series/${encodeURIComponent(serieTitle)}/episodes`);
-    if (!resEp.ok) throw new Error('Erreur API épisodes: ' + resEp.status);
+    if (!resEp.ok) throw new Error('Erreur API épisodes');
     allEpisodes = await resEp.json();
     
-    // Parser le paramètre d'épisode
     const epData = parseEpisodeParam(epParam);
     if (!epData) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Format d\'épisode invalide: ' + epParam + '</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Format d\'épisode invalide</div>';
       document.getElementById('player-container').classList.add('error-state');
       return;
     }
 
-    // Trouver l'épisode et son index
     currentEpisodeIndex = allEpisodes.findIndex(ep => 
       String(parseInt(ep.saison)) === String(parseInt(epData.saison)) && ep.numero == epData.numero
     );
 
     if (currentEpisodeIndex === -1) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Épisode S' + epData.saison + 'E' + epData.numero + ' introuvable</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Épisode introuvable</div>';
       document.getElementById('player-container').classList.add('error-state');
       return;
     }
 
     const episode = allEpisodes[currentEpisodeIndex];
     if (!episode.video) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Pas de vidéo pour cet épisode</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Pas de vidéo</div>';
       document.getElementById('player-container').classList.add('error-state');
       return;
     }
@@ -241,20 +293,15 @@ async function init() {
     const videoId = getYouTubeId(videoUrl);
     
     if (!videoId) {
-      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">URL YouTube invalide: ' + videoUrl + '</div>';
+      document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">URL YouTube invalide</div>';
       document.getElementById('player-container').classList.add('error-state');
       return;
     }
 
-    // État: Vidéo chargée
     document.getElementById('player-container').classList.remove('error-state');
-
-    // Update navigation buttons
     updateNavigationButtons();
 
-    // Attendre que YT API soit prête
     if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-      // YT pas encore chargé, attendre
       let attempts = 0;
       const waitForYT = setInterval(() => {
         attempts++;
@@ -263,7 +310,7 @@ async function init() {
           loadYouTubePlayer(videoId);
         } else if (attempts > 50) {
           clearInterval(waitForYT);
-          document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur: YouTube API non disponible</div>';
+          document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur: API non disponible</div>';
         }
       }, 100);
     } else {
@@ -272,23 +319,28 @@ async function init() {
 
   } catch (e) {
     console.error(e);
-    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur: ' + e.message + '</div>';
+    document.getElementById('player').innerHTML = '<div style="color:#999;font-size:16px;">Erreur</div>';
     document.getElementById('player-container').classList.add('error-state');
   }
 }
 
 function onPlayerReady(event) {
-  // Player prêt - afficher les boutons et mettre en fullscreen
   showControls();
   
-  setTimeout(() => {
+  let fullscreenAttempts = 0;
+  const tryFullscreen = setInterval(() => {
     const playerElem = document.querySelector('iframe');
-    if (playerElem && playerElem.requestFullscreen) {
-      playerElem.requestFullscreen().catch((err) => {
-        console.log('Fullscreen erreur:', err);
+    if (playerElem) {
+      playerElem.requestFullscreen().then(() => {
+        clearInterval(tryFullscreen);
+      }).catch(() => {
+        fullscreenAttempts++;
+        if (fullscreenAttempts > 10) {
+          clearInterval(tryFullscreen);
+        }
       });
     }
-  }, 100);
+  }, 200);
 }
 
 function loadYouTubePlayer(videoId) {
@@ -309,37 +361,10 @@ function loadYouTubePlayer(videoId) {
 }
 
 function onPlayerStateChange(event) {
-  // Optionnel: gérer les changements d'état
-  // 0 = fin, 1 = lecture, 2 = pause, -1 = non démarré
+  // Gérer les changements d'état si besoin
 }
-
-// Détection de sortie via ESC ou back button
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    goBack();
-  }
-});
-
-// Logique d'apparition/disparition des boutons avec l'interface YouTube
-let controlsHideTimer;
-const playerContainer = document.getElementById('player-container');
-const episodesNav = document.getElementById('episodes-nav');
-
-function showControls() {
-  episodesNav.classList.add('visible');
-  clearTimeout(controlsHideTimer);
-  controlsHideTimer = setTimeout(() => {
-    episodesNav.classList.remove('visible');
-  }, 3000);
-}
-
-// Afficher/masquer avec mouvement souris ou toucher
-playerContainer.addEventListener('mousemove', showControls);
-playerContainer.addEventListener('touchstart', showControls);
-playerContainer.addEventListener('touchmove', showControls);
 
 init();
-
 </script>
 </body>
 </html>
