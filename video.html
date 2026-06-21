@@ -10,21 +10,7 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
 
-.player-container { 
-  width: 100%; 
-  height: 100%; 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  background: #000; 
-  position: relative; 
-}
-
-.player { 
-  width: 100%; 
-  height: 100%; 
-  aspect-ratio: 16/9; 
-}
+.player-container { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #000; position: relative; }
 
 .player-wrapper {
   width: 100%;
@@ -32,11 +18,30 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   position: relative;
 }
 
-.player-wrapper iframe { 
-  width: 100%; 
-  height: 100%; 
-  border: none; 
-  display: block; 
+.player { width: 100%; height: 100%; aspect-ratio: 16/9; }
+.player iframe { width: 100%; height: 100%; border: none; display: block; }
+
+/* Barre de progression */
+.progress-bar-container {
+  position: absolute;
+  top: -5px;
+  left: 0;
+  right: 0;
+  height: 5px;
+  background: rgba(255,255,255,0.2);
+  cursor: pointer;
+  z-index: 101;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: #FF0000;
+  width: 0%;
+  transition: width 0.1s linear;
+}
+
+.progress-bar-fill.ad {
+  background: #FFDD00;
 }
 
 /* Contrôles custom */
@@ -45,20 +50,42 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   bottom: 0;
   left: 0;
   right: 0;
-  height: 40px;
-  background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 16px;
+  background: linear-gradient(to top, rgba(0,0,0,0.9), rgba(0,0,0,0.5));
+  padding: 12px 16px 8px;
   z-index: 100;
   opacity: 0;
   transition: opacity 0.3s;
-  gap: 8px;
 }
 
 .player-controls.visible {
   opacity: 1;
+}
+
+.controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.controls-center {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .control-btn {
@@ -69,9 +96,9 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   align-items: center;
   justify-content: center;
   padding: 4px;
-  transition: all 0.2s;
   min-width: 36px;
   height: 36px;
+  transition: all 0.2s;
 }
 
 .control-btn svg {
@@ -80,9 +107,12 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   fill: #fff;
 }
 
+.control-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+}
+
 .control-btn:hover:not(:disabled) svg {
   filter: drop-shadow(0 0 4px rgba(255,255,255,0.5));
-  transform: scale(1.1);
 }
 
 .control-btn:disabled {
@@ -90,11 +120,43 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
   cursor: not-allowed;
 }
 
-.control-btn:disabled svg {
-  fill: #666;
+.time-display {
+  font-size: 12px;
+  color: #fff;
+  min-width: 50px;
+  text-align: center;
 }
 
-/* État: Pas de vidéo/Erreur */
+.volume-slider {
+  width: 100px;
+  height: 4px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 2px;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.volume-slider::-moz-range-thumb {
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+}
+
+/* État erreur */
 .player-container.error-state {
   flex-direction: column;
   gap: 20px;
@@ -125,14 +187,48 @@ body { background: #000; color: #fff; font-family: 'DM Sans', sans-serif; width:
 
 <div class="player-container" id="player-container">
   <div class="player-wrapper">
+    <div class="progress-bar-container" id="progress-container">
+      <div class="progress-bar-fill" id="progress-fill"></div>
+    </div>
     <div class="player" id="player"></div>
     <div class="player-controls" id="player-controls">
-      <button class="control-btn" id="prev-btn" onclick="prevEpisode()" disabled title="Épisode précédent">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M220-280v-400q0-17 11.5-28.5T260-720q17 0 28.5 11.5T300-680v400q0 17-11.5 28.5T260-240q-17 0-28.5-11.5T220-280Zm458-1L430-447q-9-6-13.5-14.5T412-480q0-10 4.5-18.5T430-513l248-166q5-4 11-5t11-1q16 0 28 11t12 29v330q0 18-12 29t-28 11q-5 0-11-1t-11-5Z"/></svg>
-      </button>
-      <button class="control-btn" id="next-btn" onclick="nextEpisode()" disabled title="Épisode suivant">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px"><path d="M660-280v-400q0-17 11.5-28.5T700-720q17 0 28.5 11.5T740-680v400q0 17-11.5 28.5T700-240q-17 0-28.5-11.5T660-280Zm-440-35v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T548-480q0 10-4.5 18.5T530-447L282-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29Z"/></svg>
-      </button>
+      <div class="controls-row">
+        <div class="controls-left">
+          <button class="control-btn" id="play-btn" onclick="togglePlay()" title="Lecture">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M300.78-262.26v-435.48q0-23.22 15.96-38.11t37.04-14.89q6.7 0 14.18 1.78 7.47 1.78 14.17 5.92l342.96 218.3q11.82 7.7 18.02 19.8 6.2 12.11 6.2 24.94 0 12.83-6.2 24.94-6.2 12.1-18.02 19.8l-342.96 218.3q-6.7 4.14-14.17 5.92-7.48 1.78-14.18 1.78-21.08 0-37.04-14.89t-15.96-38.11Z"/></svg>
+          </button>
+          <button class="control-btn" id="replay-btn" onclick="rewind10()" title="Reculer 10s">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480q0-83 31.5-156T197-763q54-54 127-85.5T480-880q66 0 124 19t107 53v-76h60v206H565v-60h72q-32-39-79-61.5T480-800q-66 0-124.5 25T254-706q-43 43-68 101.5T160-480q0 66 25 124.5t68 101q43 43 101.5 68T480-160q59 0 111-21t95-59v62q-43 35-96 54.5T480-80Zm214-326h-78v-180h-60v240h138v-60Z"/></svg>
+          </button>
+          <button class="control-btn" id="forward-btn" onclick="forward10()" title="Avancer 10s">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M480-80q-83 0-156-31.5T197-197q-54-54-85.5-127T80-480h60q0 66 25 124.5t68 101q43 43 101.5 68T480-160q59 0 111-21t95-59v62q-43 35-96 54.5T480-80Zm214-326H556v-60h138v240h-60v-180Zm286-314v-206h-206v-60h266v266h-60ZM814-80v-62q43-35 96-54.5t116-19.5q83 0 156-31.5T927-197q54-54 85.5-127T1044-480q0-83-31.5-156T927-763q-54-54-127-85.5T644-880q-66 0-124 19t-107 53v-76h-60v206h206v-60h-72q32-39 79-61.5t124-22.5q66 0 124.5 25T910-706q43 43 68 101.5t25 124.5q0 66-25 124.5T910-234q-43 43-101.5 68T684-160q-59 0-111-21t-95-59Z"/></svg>
+          </button>
+        </div>
+        <div class="controls-center">
+          <button class="control-btn" id="prev-ep-btn" onclick="prevEpisode()" disabled title="Épisode précédent">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M220-280v-400q0-17 11.5-28.5T260-720q17 0 28.5 11.5T300-680v400q0 17-11.5 28.5T260-240q-17 0-28.5-11.5T220-280Zm458-1L430-447q-9-6-13.5-14.5T412-480q0-10 4.5-18.5T430-513l248-166q5-4 11-5t11-1q16 0 28 11t12 29v330q0 18-12 29t-28 11q-5 0-11-1t-11-5Z"/></svg>
+          </button>
+          <button class="control-btn" id="next-ep-btn" onclick="nextEpisode()" disabled title="Épisode suivant">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M660-280v-400q0-17 11.5-28.5T700-720q17 0 28.5 11.5T740-680v400q0 17-11.5 28.5T700-240q-17 0-28.5-11.5T660-280Zm-440-35v-330q0-18 12-29t28-11q5 0 11 1t11 5l248 166q9 6 13.5 14.5T548-480q0 10-4.5 18.5T530-447L282-281q-5 4-11 5t-11 1q-16 0-28-11t-12-29Z"/></svg>
+          </button>
+        </div>
+        <div class="controls-right">
+          <div class="time-display"><span id="current-time">0:00</span> / <span id="total-time">0:00</span></div>
+          <button class="control-btn" id="volume-btn" onclick="toggleMute()" title="Volume">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M560-131q-12 0-23-4.5t-20-13.5L340-309H180q-24 0-42-18t-18-42v-262q0-24 18-42t42-18h160l177-177q9-9 20-13.5t23-4.5q33 0 56.5 23.5T840-720v440q0 33-23.5 56.5T760-200q-12 0-23-4.5t-20-13.5L560-131Z"/></svg>
+          </button>
+          <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" onchange="setVolume(this.value)">
+          <button class="control-btn" id="cc-btn" onclick="toggleCC()" title="Sous-titres">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M240-240q-33 0-56.5-23.5T160-320v-480q0-33 23.5-56.5T240-880h480q33 0 56.5 23.5T800-800v480q0 33-23.5 56.5T720-240H240Zm0-60h480v-480H240v480Zm60-84h70v-40h-70v40Zm0-120h70v-40h-70v40Zm150 120h70v-40h-70v40Zm0-120h70v-40h-70v40Zm150 120h70v-40h-70v40Zm0-120h70v-40h-70v40Z"/></svg>
+          </button>
+          <button class="control-btn" id="settings-btn" onclick="openSettings()" title="Paramètres">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="m388-80-20-126q-19-7-40-19t-37-29l-118 54-93-164 100-77q-4-20-6-39.5t-2-40.5q0-21 2-40.5t6-39.5l-100-77 93-164 118 54q16-17 37-29t40-19l20-126h184l20 126q19 7 40 19t37 29l118-54 93 164-100 77q4 20 6 39.5t2 40.5q0 21-2 40.5t-6 39.5l100 77-93 164-118-54q-16 17-37 29t-40 19l-20 126H388Zm92-310q54 0 92-38t38-92q0-54-38-92t-92-38q-54 0-92 38t-38 92q0 54 38 92t92 38Z"/></svg>
+          </button>
+          <button class="control-btn" id="fullscreen-btn" onclick="toggleFullscreen()" title="Plein écran">
+            <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M120-120v-200h60v140h140v60H120Zm520 0v-60h140v-140h60v200H640ZM120-640v-200h200v60H180v140h-60Zm720 0v-140h-140v-60h200v200h-60Z"/></svg>
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -148,9 +244,15 @@ let videoUrl = null;
 let allEpisodes = [];
 let currentEpisodeIndex = -1;
 let controlsHideTimer;
-const playerContainer = document.getElementById('player-container');
-const playerControls = document.getElementById('player-controls');
+let isPlaying = false;
+let isMuted = false;
+let isAdPlaying = false;
+
 const playerWrapper = document.querySelector('.player-wrapper');
+const playerControls = document.getElementById('player-controls');
+const playBtn = document.getElementById('play-btn');
+const progressContainer = document.getElementById('progress-container');
+const progressFill = document.getElementById('progress-fill');
 
 function getYouTubeId(url) {
   if (!url) return null;
@@ -162,16 +264,12 @@ function getYouTubeId(url) {
 
 function parseEpisodeParam(param) {
   if (!param) return null;
-  
   const textMatch = param.match(/S([a-z]+)E(\d+)/i);
   if (textMatch) return { saison: textMatch[1], numero: parseInt(textMatch[2], 10) };
-  
   const numMatch = param.match(/S(\d+)E(\d+)/i);
   if (numMatch) return { saison: numMatch[1], numero: parseInt(numMatch[2], 10) };
-  
   const altMatch = param.match(/E(\d+)\.S(.+)/i);
   if (altMatch) return { saison: altMatch[2], numero: parseInt(altMatch[1], 10) };
-  
   return null;
 }
 
@@ -184,9 +282,8 @@ function goBack() {
 }
 
 function updateNavigationButtons() {
-  const prevBtn = document.getElementById('prev-btn');
-  const nextBtn = document.getElementById('next-btn');
-  
+  const prevBtn = document.getElementById('prev-ep-btn');
+  const nextBtn = document.getElementById('next-ep-btn');
   prevBtn.disabled = currentEpisodeIndex <= 0;
   nextBtn.disabled = currentEpisodeIndex >= allEpisodes.length - 1;
 }
@@ -209,6 +306,60 @@ function nextEpisode() {
   }
 }
 
+function togglePlay() {
+  if (!player) return;
+  if (isPlaying) {
+    player.pauseVideo();
+  } else {
+    player.playVideo();
+  }
+}
+
+function rewind10() {
+  if (!player) return;
+  player.seekTo(Math.max(0, player.getCurrentTime() - 10));
+}
+
+function forward10() {
+  if (!player) return;
+  player.seekTo(player.getCurrentTime() + 10);
+}
+
+function toggleMute() {
+  if (!player) return;
+  if (isMuted) {
+    player.unMute();
+  } else {
+    player.mute();
+  }
+}
+
+function setVolume(value) {
+  if (!player) return;
+  player.setVolume(parseInt(value));
+}
+
+function toggleCC() {
+  // YouTube ne permet pas de controler les sous-titres facilement via l'API
+  console.log('CC toggle - feature limitée');
+}
+
+function openSettings() {
+  // Settings menu - à implémenter si besoin
+  console.log('Settings menu');
+}
+
+function toggleFullscreen() {
+  const playerElem = document.querySelector('.player-wrapper');
+  if (playerElem.requestFullscreen) {
+    playerElem.requestFullscreen();
+  } else if (playerElem.mozRequestFullScreen) {
+    playerElem.mozRequestFullScreen();
+  } else if (playerElem.webkitRequestFullscreen) {
+    playerElem.webkitRequestFullscreen();
+  }
+}
+
 function showControls() {
   playerControls.classList.add('visible');
   clearTimeout(controlsHideTimer);
@@ -227,19 +378,33 @@ playerWrapper.addEventListener('touchend', showControls);
 document.addEventListener('fullscreenchange', () => {
   if (document.fullscreenElement) {
     showControls();
+  } else if (serieTitle) {
+    goBack();
   }
 });
 
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     goBack();
+  } else if (e.key === ' ') {
+    e.preventDefault();
+    togglePlay();
+  } else if (e.key === 'ArrowRight') {
+    forward10();
+  } else if (e.key === 'ArrowLeft') {
+    rewind10();
+  } else if (e.key === 'f') {
+    toggleFullscreen();
+  } else if (e.key === 'm') {
+    toggleMute();
   }
 });
 
-document.addEventListener('fullscreenchange', () => {
-  if (!document.fullscreenElement && serieTitle) {
-    goBack();
-  }
+progressContainer.addEventListener('click', (e) => {
+  if (!player) return;
+  const rect = progressContainer.getBoundingClientRect();
+  const percentage = (e.clientX - rect.left) / rect.width;
+  player.seekTo(percentage * player.getDuration());
 });
 
 async function init() {
@@ -341,6 +506,31 @@ function onPlayerReady(event) {
       });
     }
   }, 200);
+  
+  // Update progress bar
+  setInterval(updateProgressBar, 100);
+}
+
+function updateProgressBar() {
+  if (!player || !player.getDuration) return;
+  const duration = player.getDuration();
+  const current = player.getCurrentTime();
+  if (duration > 0) {
+    const percentage = (current / duration) * 100;
+    progressFill.style.width = percentage + '%';
+    document.getElementById('current-time').textContent = formatTime(current);
+    document.getElementById('total-time').textContent = formatTime(duration);
+  }
+}
+
+function formatTime(seconds) {
+  const hrs = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  const secs = Math.floor(seconds % 60);
+  if (hrs > 0) {
+    return `${hrs}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  }
+  return `${mins}:${secs.toString().padStart(2, '0')}`;
 }
 
 function loadYouTubePlayer(videoId) {
@@ -348,9 +538,8 @@ function loadYouTubePlayer(videoId) {
     videoId: videoId,
     playerVars: {
       autoplay: 1,
-      fs: 1,
       rel: 0,
-      controls: 1,
+      controls: 0,
       modestbranding: 1
     },
     events: {
@@ -361,7 +550,14 @@ function loadYouTubePlayer(videoId) {
 }
 
 function onPlayerStateChange(event) {
-  // Gérer les changements d'état si besoin
+  // 0 = fin, 1 = lecture, 2 = pause, -1 = non démarré
+  if (event.data === 1) {
+    isPlaying = true;
+    playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M360-360q-33 0-56.5-23.5T280-440v-80q0-33 23.5-56.5T360-600q33 0 56.5 23.5T440-520v80q0 33-23.5 56.5T360-360Zm240 0q-33 0-56.5-23.5T520-440v-80q0-33 23.5-56.5T600-600q33 0 56.5 23.5T680-520v80q0 33-23.5 56.5T600-360Z"/></svg>';
+  } else {
+    isPlaying = false;
+    playBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M300.78-262.26v-435.48q0-23.22 15.96-38.11t37.04-14.89q6.7 0 14.18 1.78 7.47 1.78 14.17 5.92l342.96 218.3q11.82 7.7 18.02 19.8 6.2 12.11 6.2 24.94 0 12.83-6.2 24.94-6.2 12.1-18.02 19.8l-342.96 218.3q-6.7 4.14-14.17 5.92-7.48 1.78-14.18 1.78-21.08 0-37.04-14.89t-15.96-38.11Z"/></svg>';
+  }
 }
 
 init();
