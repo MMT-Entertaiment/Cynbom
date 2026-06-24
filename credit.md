@@ -5,3 +5,5 @@
 
 ## Collaborateurs GitHub
 - Personne
+
+© 2024-2026 MMT Entertaiment - Studio créatif indépendant
