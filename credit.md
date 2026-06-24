@@ -1,7 +1,7 @@
 # CYNBOM – CREDIT
 ## MMT ENTERTAIMENT
- - Uzy – Développeur, Designeur, Chef de projet
- - PunPun – Chef de projet, Créateur du projet
+ - Uzy – Développeur, Designeur, Chef de projet, Gérant du catalogue animé
+ - PunPun – Chef de projet, Créateur du projet, Gérant du catalogue live action
 
 ## Collaborateurs GitHub
 - Personne
