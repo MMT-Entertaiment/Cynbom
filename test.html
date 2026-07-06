@@ -53,16 +53,17 @@
     position:relative;
     flex:1;
     height:64px;
-    padding:0 8px;
+    padding:0 4px;
     border-radius:32px;
     background:#ffffff;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
-    gap:4px;
+    gap:2px;
     color:#000000;
     font-family:'Google Sans', sans-serif;
-    font-size:11px;
+    font-size:10px;
     text-align:center;
     white-space:nowrap;
     font-weight:600;
@@ -79,8 +80,8 @@
     transform:scale(0.95);
   }
   .nav-bubble img{
-    width:18px;
-    height:18px;
+    width:20px;
+    height:20px;
     object-fit:contain;
     flex-shrink:0;
     filter:brightness(0);
@@ -88,6 +89,7 @@
   .nav-bubble span{
     overflow:hidden;
     text-overflow:ellipsis;
+    line-height:1;
   }
 
   /* PAGE CONTENT */
