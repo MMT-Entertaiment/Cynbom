@@ -53,17 +53,18 @@
   .nav-bubble{
     position:relative;
     width:fit-content;
-    min-width:70px;
+    min-width:80px;
     height:64px;
-    padding:0 16px;
+    padding:0 12px;
     border-radius:32px;
     background:#ffffff;
     display:flex;
     align-items:center;
     justify-content:center;
+    gap:6px;
     color:#000000;
     font-family:'Google Sans', sans-serif;
-    font-size:13px;
+    font-size:12px;
     text-align:center;
     white-space:nowrap;
     font-weight:600;
@@ -77,6 +78,11 @@
   }
   .nav-bubble:active{
     transform:scale(0.95);
+  }
+  .nav-bubble img{
+    width:20px;
+    height:20px;
+    object-fit:contain;
   }
 
   /* PAGE CONTENT */
@@ -136,9 +142,18 @@
 
 <!-- NAVIGATION BAR -->
 <div class="cynbom-nav-bar">
-  <div class="nav-bubble" onclick="setPage('accueil')">Accueil</div>
-  <div class="nav-bubble" onclick="setPage('recherche')">Rechercher</div>
-  <div class="nav-bubble" onclick="setPage('parametres')">Paramètres</div>
+  <div class="nav-bubble" onclick="setPage('accueil')">
+    <img src="https://i.postimg.cc/15vwfXBX/Home.png" alt="Accueil">
+    <span>Accueil</span>
+  </div>
+  <div class="nav-bubble" onclick="setPage('recherche')">
+    <img src="https://i.postimg.cc/bNmksrgd/Search.png" alt="Rechercher">
+    <span>Rechercher</span>
+  </div>
+  <div class="nav-bubble" onclick="setPage('parametres')">
+    <img src="https://i.postimg.cc/76bkC7Wn/settings.png" alt="Paramètres">
+    <span>Paramètres</span>
+  </div>
 </div>
 
 <!-- PAGE CONTENT -->
@@ -235,7 +250,7 @@ function setPage(page) {
   
   // Update button states
   document.querySelectorAll('.nav-bubble').forEach(b => b.style.opacity = '0.6');
-  event.target.style.opacity = '1';
+  event.target.closest('.nav-bubble').style.opacity = '1';
 }
 
 // Set initial active button
