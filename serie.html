@@ -13,7 +13,7 @@ body { background: #000; color: #fff; font-family: 'Google Sans', sans-serif; ma
 .header { position: relative; }
 .header-img { width: 100%; height: 260px; object-fit: cover; display: block; }
 .header-gradient { position: absolute; bottom: 0; left: 0; right: 0; height: 160px; background: linear-gradient(to bottom, transparent, #000); }
-.back-btn { position: absolute; top: 20px; left: 16px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; border: 0.5px solid #333; }
+.back-btn { position: absolute; top: 20px; left: 16px; width: 36px; height: 36px; border-radius: 50%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .back-btn svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
 
 .info { padding: 16px 20px 0; }
@@ -89,8 +89,8 @@ async function init() {
 
     // Header
     document.getElementById('header').innerHTML = serie.image 
-      ? `<img class="header-img" src="${serie.image}"><div class="header-gradient"></div><div class="back-btn" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`
-      : `<div class="header-placeholder" style="height:260px;background:#111;display:flex;align-items:center;justify-content:center;color:#333;">${serie.titre}</div><div class="back-btn" onclick="history.back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" stroke="#fff" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+      ? `<img class="header-img" src="${serie.image}"><div class="header-gradient"></div><div class="back-btn" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" stroke="white" stroke-width="2" fill="none"/></svg></div>`
+      : `<div class="header-placeholder" style="height:260px;background:#111;display:flex;align-items:center;justify-content:center;color:#333;">${serie.titre}</div><div class="back-btn" onclick="window.location.href='index.html'"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6" stroke="white" stroke-width="2" fill="none"/></svg></div>`;
 
     // Info
     document.getElementById('info').innerHTML = `
@@ -145,14 +145,14 @@ async function init() {
       html += `<div class="saison-label">${isNaN(saison) ? saison : `Saison ${saison}`}</div>`;
       saisons[saison].forEach(ep => {
         const idx = isOST ? ostEpisodes.findIndex(e => e.saison === ep.saison && e.numero === ep.numero) : -1;
-        html += `<div class="ep-card ${locked ? 'locked' : ''}" id="ep-${ep.saison}-${ep.numero}" ${locked ? '' : `onclick="${isOST ? `ostLoad(${idx})` : `playVideoInModal('${titre.replace(/'/g, "\\'")}', '${ep.saison}', '${ep.numero}')` }"`}>
+        html += `<div class="ep-card ${locked ? 'locked' : ''}" id="ep-${ep.saison}-${ep.numero}" ${locked ? '' : `onclick="${isOST ? `ostLoad(${idx})` : `playVideoInModal('${titre.replace(/'/g, "\\'")}', '${ep.saison}', ${ep.numero})`}"`}>
           <div class="ep-num">${ep.numero}</div>
           <div class="ep-info">
             <div class="ep-title">${ep.titre || `Épisode ${ep.numero}`}</div>
             <div class="ep-meta">${isNaN(saison) ? saison : 'S' + ep.saison} · E${ep.numero}</div>
           </div>
           <div class="ep-play ${ep.video ? 'has-video' : ''}">
-            ${locked ? '<svg viewBox="0 0 24 24"><path d="M18 11H16V7C16 4.79 14.21 3 12 3S8 4.79 8 7V11H6C4.9 11 4 11.9 4 13V21C4 22.1 4.9 23 6 23H18C19.1 23 20 22.1 20 21V13C20 11.9 19.1 11 18 11ZM12 18C10.9 18 10 17.1 10 16S10.9 14 12 14 14 14.9 14 16 13.1 18 12 18ZM14 11H10V7C10 5.9 10.9 5 12 5S14 5.9 14 7V11Z" fill="#333"/></svg>' : '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>'}
+            ${locked ? '<svg viewBox="0 0 24 24"><path d="M18 11H16V7C16 4.79 14.21 3 12 3S8 4.79 8 7V11H6C4.9 11 4 11.9 4 13V21C4 22.1 4.9 23 6 23H18C19.1 23 20 22.1 20 21V13C20 11.9 19.1 11 18 11ZM12 13C10.34 13 9 14.34 9 16C9 17.66 10.34 19 12 19C13.66 19 15 17.66 15 16C15 14.34 13.66 13 12 13Z"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M8 5V19L19 12Z" fill="currentColor"/></svg>'}
           </div>
         </div>`;
       });
