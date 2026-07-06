@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test - Cynbom</title>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #000; color: #fff; font-family: 'Google Sans', sans-serif; max-width: 400px; margin: 0 auto; min-height: 100vh; }
+
+/* TOPBAR */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 20px 12px; position: sticky; top: 0; background: #000; z-index: 50; border-bottom: 0.5px solid #111; }
+.topbar img.logo { height: 40px; object-fit: contain; }
+
+/* PAGES */
+.page { display: none; padding: 0 0 160px; }
+.page.active { display: block; }
+
+/* PAGE CONTENT */
+.page-content { padding: 20px; }
+.page-title { font-size: 28px; font-weight: 700; margin-bottom: 24px; }
+.content-section { margin-bottom: 24px; }
+.content-text { font-size: 14px; line-height: 1.6; color: #ccc; }
+
+/* BOTTOM BAR */
+.bottom-bar { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 400px; background: #000; border-top: 0.5px solid #1a1a1a; padding: 10px 0 24px; display: flex; justify-content: space-around; align-items: flex-end; }
+.bar-btn { display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; min-width: 70px; }
+.bar-btn img { width: 26px; height: 26px; object-fit: contain; opacity: 0.35; transition: opacity 0.15s; }
+.bar-btn .bar-icon { font-size: 22px; opacity: 0.35; transition: opacity 0.15s; line-height: 1; }
+.bar-btn span.bar-label { font-size: 11px; font-weight: 500; color: #444; transition: color 0.15s; }
+.bar-btn.active img { opacity: 1; }
+.bar-btn.active .bar-icon { opacity: 1; }
+.bar-btn.active span.bar-label { color: #fff; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <img class="logo" src="https://i.postimg.cc/v8LWw36P/Logo-Cynbom.jpg" alt="Cynbom">
+  <img src="https://i.postimg.cc/sXtQpG8Z/rate.png" alt="Noter" style="height:34px;object-fit:contain;cursor:pointer;">
+</div>
+
+<!-- PAGE ACCUEIL -->
+<div class="page active" id="page-accueil">
+  <div class="page-content">
+    <div class="page-title">Accueil</div>
+    <div class="content-section">
+      <div class="content-text">
+        Bienvenue sur Cynbom! Cette page de test affiche le contenu de la page d'accueil avec la navigation de Cynbom.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE RECHERCHE -->
+<div class="page" id="page-recherche">
+  <div class="page-content">
+    <div class="page-title">Rechercher</div>
+    <div class="content-section">
+      <div class="content-text">
+        Page de recherche - Trouvez vos séries, films et OST préférés.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAGE SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="page-content">
+    <div class="page-title">Paramètres</div>
+    <div class="content-section">
+      <div class="content-text">
+        Page de paramètres - Gérez vos préférences et consultez les informations importantes.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <div class="bar-btn active" id="btn-accueil" onclick="setPage('accueil')">
+    <img src="https://i.postimg.cc/15vwfXBX/Home.png" alt="Accueil">
+    <span class="bar-label">Accueil</span>
+  </div>
+  <div class="bar-btn" id="btn-recherche" onclick="setPage('recherche')">
+    <img src="https://i.postimg.cc/bNmksrgd/Search.png" alt="Rechercher">
+    <span class="bar-label">Rechercher</span>
+  </div>
+  <div class="bar-btn" id="btn-settings" onclick="setPage('settings')">
+    <img src="https://i.postimg.cc/76bkC7Wn/settings.png" alt="Paramètres">
+    <span class="bar-label">Paramètres</span>
+  </div>
+</div>
+
+<script>
+// NAVIGATION
+function setPage(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.bar-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('btn-' + page).classList.add('active');
+}
+</script>
+</body>
+</html>
