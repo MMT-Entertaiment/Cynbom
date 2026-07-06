@@ -45,44 +45,48 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    padding:0 12px;
-    max-width:400px;
-    margin:0 auto;
+    gap:4px;
+    padding:0 8px;
+    overflow:hidden;
   }
   .nav-bubble{
     position:relative;
-    width:fit-content;
-    min-width:80px;
+    flex:1;
     height:64px;
-    padding:0 12px;
+    padding:0 8px;
     border-radius:32px;
     background:#ffffff;
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
+    gap:4px;
     color:#000000;
     font-family:'Google Sans', sans-serif;
-    font-size:12px;
+    font-size:11px;
     text-align:center;
     white-space:nowrap;
     font-weight:600;
     cursor:pointer;
     transition:all 0.2s ease;
-    flex-shrink:0;
+    flex-shrink:1;
+    min-width:0;
   }
   .nav-bubble:hover{
-    transform:scale(1.05);
+    transform:scale(1.02);
     box-shadow:0 4px 12px rgba(255,255,255,0.2);
   }
   .nav-bubble:active{
     transform:scale(0.95);
   }
   .nav-bubble img{
-    width:20px;
-    height:20px;
+    width:18px;
+    height:18px;
     object-fit:contain;
+    flex-shrink:0;
+  }
+  .nav-bubble span{
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
 
   /* PAGE CONTENT */
