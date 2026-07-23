@@ -13,6 +13,11 @@ Note 2 (Lundi 13/07/2026-11:56)
 
 -Uzy (fondateur de MMT Entertaiment)
 
+Note 3 (Jeudi 23/07/2026-11:52)
+Le Frontend (visuel) de la page avant avec le système de compte fonctionnel, mais le Backend (serveur) n'es pas du tout prêt (désolé) nous avons lentement mais sûrement, nous avons pour l'instant aucune date à donné pour la fin de la maintenance, mais longtemps (moins que Fuze avec Modedd mais longtemps quand même)
+
+-MStudio Web
+
 [Crédit](https://mmt-entertaiment.github.io/Cynbom/credit.html)
 
 [Conditions d'utilisation](https://mmt-entertaiment.github.io/Cynbom/tos.html)
